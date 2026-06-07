@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EFECTO — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&family=Space+Mono:wght@400;700&family=Comfortaa:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e12; --bg2: #16161e; --bg3: #1e1e2a;
+    --border: #2a2a3a; --text: #e8e8f0; --muted: #888899;
+    --accent: #c8f564; --r: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Nunito', sans-serif; font-weight: 600; padding: 32px; min-height: 100vh; }
+  h1 { font-family: 'Fredoka One', cursive; color: var(--accent); font-size: 2rem; margin-bottom: 8px; }
+  .sub { color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.75rem; margin-bottom: 32px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-family: 'Space Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  input, select { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: 'Nunito', sans-serif; font-size: 0.95rem; outline: none; transition: border-color .2s; }
+  input:focus, select:focus { border-color: var(--accent); }
+  select option { background: var(--bg3); }
+
+  .effects-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .eff-cb { display: flex; align-items: center; gap: 5px; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; cursor: pointer; font-size: 0.8rem; font-family: 'Fredoka One', 'Comfortaa', cursive; transition: all .15s; user-select: none; }
+  .eff-cb:hover { border-color: var(--accent); }
+  .eff-cb input { display: none; }
+  .eff-cb.checked { background: rgba(200,245,100,0.12); border-color: var(--accent); color: var(--accent); }
+
+  .generate-btn { margin-top: 28px; background: var(--accent); color: #0e0e12; border: none; font-family: 'Fredoka One', cursive; font-size: 1.1rem; padding: 14px 36px; border-radius: 50px; cursor: pointer; transition: transform .2s; }
+  .generate-btn:hover { transform: translateY(-2px); }
+
+  .output-section { margin-top: 32px; max-width: 800px; display: none; }
+  .output-section h2 { font-family: 'Fredoka One', cursive; color: var(--accent); margin-bottom: 12px; }
+  .output-section p { color: var(--muted); font-size: 0.85rem; margin-bottom: 12px; line-height: 1.6; }
+  .code-block { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent); white-space: pre-wrap; word-break: break-all; line-height: 1.6; }
+  .copy-btn { margin-top: 12px; background: var(--bg3); border: 1px solid var(--border); color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.75rem; padding: 8px 18px; border-radius: 6px; cursor: pointer; transition: all .2s; }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .instructions { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; margin-top: 20px; }
+  .instructions h3 { font-family: 'Fredoka One', cursive; color: var(--text); margin-bottom: 10px; }
+  .instructions ol { padding-left: 20px; color: var(--muted); font-size: 0.85rem; line-height: 2; }
+  .instructions code { background: var(--bg3); padding: 2px 6px; border-radius: 4px; color: var(--accent); font-family: 'Space Mono', monospace; font-size: 0.75rem; }
+</style>
+</head>
+<body>
+
+<h1>🐈‍⬛ EFECTO Admin</h1>
+<div class="sub">Add a new strain to the atlas</div>
+
+<div class="form-grid">
+  <div class="form-group">
+    <label>Strain Name *</label>
+    <input type="text" id="strainName" placeholder="e.g. Blue Dream">
+  </div>
+  <div class="form-group">
+    <label>City *</label>
+    <input type="text" id="strainCity" placeholder="e.g. Berlin">
+  </div>
+  <div class="form-group">
+    <label>Type *</label>
+    <select id="strainType">
+      <option value="Hybrid">Hybrid</option>
+      <option value="Sativa">Sativa</option>
+      <option value="Indica">Indica</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>THC %</label>
+    <input type="number" id="strainTHC" placeholder="e.g. 22" min="0" max="35">
+  </div>
+  <div class="form-group">
+    <label>CBD %</label>
+    <input type="number" id="strainCBD" placeholder="e.g. 1" min="0" max="20">
+  </div>
+
+  <div class="form-group full">
+    <label>Effects * (select all that apply)</label>
+    <div class="effects-grid" id="effectsGrid"></div>
+  </div>
+</div>
+
+<button class="generate-btn" onclick="generate()">Generate Code →</button>
+
+<div class="output-section" id="outputSection">
+  <h2>✅ Готовый код</h2>
+  <p>Скопируй код ниже и вставь в <code>efecto.html</code> в место помеченное <code>// ← PASTE NEW STRAINS HERE</code>. Запятая уже включена в начале кода!</p>
+  <div class="code-block" id="codeOutput"></div>
+  <button class="copy-btn" onclick="copyCode()">📋 Copy to clipboard</button>
+
+  <div class="instructions">
+    <h3>📋 Как добавить сорт в efecto.html</h3>
+    <ol>
+      <li>Открой <code>efecto.html</code> в любом текстовом редакторе (TextEdit на Mac, VS Code, Notepad)</li>
+      <li>Нажми <code>Cmd+F</code> (Mac) или <code>Ctrl+F</code> (Windows) и найди: <code>// ← PASTE NEW STRAINS HERE</code></li>
+      <li>Поставь курсор перед этим комментарием</li>
+      <li>Вставь скопированный код — он уже содержит запятую в начале</li>
+      <li>Сохрани файл. Готово!</li>
+    </ol>
+    <h3 style="margin-top:16px">🗺️ Новый город на карте?</h3>
+    <ol>
+      <li>Найди в файле: <code>// ← PASTE NEW CITIES HERE</code></li>
+      <li>Добавь строку вида: <code>{ name: "Prague", lat: 50.08, lng: 14.44 },</code></li>
+      <li>Координаты (lat/lng) легко найти в Google Maps — правый клик на город → "Что здесь?"</li>
+    </ol>
+    <p style="margin-top:12px;color:#c8f564;font-size:0.8rem">✅ Сорт появится автоматически во вкладке Strains, в Effects и на карте если город уже есть!</p>
+  </div>
+</div>
+
+<script>
+const ALL_EFFECTS = [
+  "active","anxious","chilled","clear","comfy","couchlocked","coughing","creative",
+  "dizzy","dreamy","dry mouth","energetic","euphoric","foggy","forgetful","frisky",
+  "giggly","great","happy","headache","high","hungry","light","nausea","optimistic",
+  "paranoid","peaceful","productive","rapid pulse","red eyes","reflective","relaxed",
+  "restless","sleepy","talkative","tingly","thirsty","tuned","unmotivated"
+];
+
+const EFFECT_EMOJIS = {
+  active:"⚡",anxious:"😬",chilled:"🧊",clear:"🔍",comfy:"🫶",couchlocked:"🛋️",
+  coughing:"💨",creative:"🎨",dizzy:"🌀",dreamy:"🌙","dry mouth":"🏜️",energetic:"🔋",
+  euphoric:"✨",foggy:"🌫️",forgetful:"🫧",frisky:"😏",giggly:"😂",great:"🌟",
+  happy:"😊",headache:"🤕",high:"🚀",hungry:"🍕",light:"🪶",nausea:"🤢",
+  optimistic:"🌈",paranoid:"👁️",peaceful:"🕊️",productive:"📋","rapid pulse":"💓",
+  "red eyes":"👁️",reflective:"🪞",relaxed:"🌿",restless:"🌪️",sleepy:"😴",
+  talkative:"💬",tingly:"⚡",thirsty:"💧",tuned:"🎵",unmotivated:"😑"
+};
+
+// Build effect checkboxes
+const grid = document.getElementById('effectsGrid');
+ALL_EFFECTS.forEach(ef => {
+  const label = document.createElement('label');
+  label.className = 'eff-cb';
+  label.innerHTML = `<input type="checkbox" value="${ef}"><span>${EFFECT_EMOJIS[ef] || '•'} ${ef}</span>`;
+  label.querySelector('input').addEventListener('change', function() {
+    label.classList.toggle('checked', this.checked);
+  });
+  grid.appendChild(label);
+});
+
+function generate() {
+  const name = document.getElementById('strainName').value.trim();
+  const city = document.getElementById('strainCity').value.trim();
+  const type = document.getElementById('strainType').value;
+  const thc = parseInt(document.getElementById('strainTHC').value) || 0;
+  const cbd = parseInt(document.getElementById('strainCBD').value) || 0;
+
+  const effects = [...document.querySelectorAll('#effectsGrid input:checked')].map(i => i.value);
+
+  if (!name || !city || effects.length === 0) {
+    alert('Please fill in: Strain Name, City, and at least one Effect!');
+    return;
+  }
+
+  const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const effectsList = effects.map(e => `"${e}"`).join(',');
+
+  const code = `,
+  {
+    id: "${id}",
+    name: "${name}",
+    type: "${type}",
+    thc: ${thc}, cbd: ${cbd},
+    city: "${city}",
+    effects: [${effectsList}]
+  }`;
+
+  document.getElementById('codeOutput').textContent = code;
+  document.getElementById('outputSection').style.display = 'block';
+  document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function copyCode() {
+  const code = document.getElementById('codeOutput').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy to clipboard', 2000);
+  });
+}
+</script>
+</body>
+</html>
