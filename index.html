@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EFECTO — The Strain Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&family=Space+Mono:wght@400;700&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0e0e12;
+    --bg2:       #16161e;
+    --bg3:       #1e1e2a;
+    --border:    #2a2a3a;
+    --text:      #e8e8f0;
+    --muted:     #888899;
+    --accent:    #c8f564;
+    --sativa:    #FFD166;
+    --indica:    #8B7FE8;
+    --hybrid:    #5CE8C0;
+    --r: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(14,14,18,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .logo {
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 1.6rem;
+    color: var(--accent);
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo span { color: var(--muted); font-size: 0.85rem; font-family: 'Nunito', sans-serif; font-weight: 400; }
+
+  nav { display: flex; gap: 4px; }
+  nav button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  nav button:hover { color: var(--text); background: var(--bg3); }
+  nav button.active { color: var(--accent); background: var(--bg3); }
+
+  .lang-switcher { display: flex; gap: 4px; }
+  .lang-switcher button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .2s;
+    font-family: 'Space Mono', monospace;
+  }
+  .lang-switcher button:hover,
+  .lang-switcher button.active { color: var(--accent); border-color: var(--accent); }
+
+  /* ── PAGES ── */
+  .page { display: none; padding: 28px 32px; animation: fadeIn .3s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── MAP PAGE ── */
+  #page-map .layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+    min-height: calc(100vh - 120px);
+  }
+
+  .map-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    position: relative;
+    overflow: hidden;
+  }
+
+  svg#europe-map {
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+  }
+
+  svg#europe-map path {
+    fill: #1a1a28;
+    stroke: #2e2e42;
+    stroke-width: 0.5;
+    transition: fill .2s;
+  }
+
+  .city-dot {
+    cursor: pointer;
+    transition: r .2s;
+  }
+  .city-dot circle {
+    fill: var(--accent);
+    opacity: 0.85;
+    filter: drop-shadow(0 0 5px var(--accent));
+    transition: r .2s;
+  }
+  .city-dot:hover circle { r: 8; }
+  .city-dot text {
+    fill: var(--text);
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    pointer-events: none;
+    text-shadow: 0 1px 3px #000;
+  }
+
+  /* city popup */
+  .city-popup {
+    position: absolute;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    min-width: 160px;
+    max-width: 220px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity .2s, transform .2s;
+    z-index: 10;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .city-popup.show { opacity: 1; transform: translateY(0); pointer-events: all; }
+  .city-popup * { pointer-events: all; }
+  .more-link { pointer-events: all !important; cursor: pointer !important; }
+  .city-popup .more-link { pointer-events: all !important; cursor: pointer !important; }
+  .city-popup h4 { font-family: 'Fredoka One', 'Comfortaa', cursive; color: var(--accent); margin-bottom: 8px; font-size: 1rem; }
+
+  .strain-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin: 2px;
+    cursor: pointer;
+    transition: opacity .2s, transform .2s;
+    white-space: normal;
+  }
+  .strain-pill:hover { opacity: 0.8; transform: scale(1.04); }
+  .more-link {
+    display: block;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-family: 'Space Mono', monospace;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: 6px;
+    pointer-events: all;
+  }
+
+  /* sidebar */
+  .map-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .sidebar-tabs { display: flex; gap: 6px; }
+  .sidebar-tabs button {
+    flex: 1;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .sidebar-tabs button.active { color: var(--accent); border-color: var(--accent); }
+
+  .sidebar-content {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 16px;
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(100vh - 220px);
+  }
+
+  .sidebar-content h3 {
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+  }
+
+  .city-group { margin-bottom: 16px; }
+  .city-group h4 {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .list-strain-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+    font-size: 1.15rem;
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    letter-spacing: 0.3px;
+  }
+  .list-strain-item:hover { background: var(--bg3); transform: translateX(4px); }
+  .type-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── STRAINS PAGE ── */
+  .strains-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .strain-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+    cursor: pointer;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+  }
+  .strain-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .strain-card .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .strain-card h3 { font-family: 'Fredoka One', 'Comfortaa', cursive; font-size: 1.1rem; color: var(--text); }
+  .type-badge {
+    font-size: 0.65rem;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .strain-card .city-tag {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .strain-card .thc-info {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 10px;
+  }
+  .effects-preview { display: flex; flex-wrap: wrap; gap: 4px; }
+  .effect-bubble {
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1.5px solid;
+    cursor: pointer;
+    transition: transform .15s, opacity .15s;
+    white-space: normal;
+    word-break: break-word;
+  }
+  .effects-preview {
+    overflow: hidden;
+  }
+  .effect-bubble:hover { transform: scale(1.06); }
+
+  /* ── EFFECTS PAGE ── */
+  .effects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  .effect-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 16px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .effect-card:hover { transform: translateY(-3px); border-color: currentColor; }
+  .effect-card .eff-emoji { font-size: 1.8rem; margin-bottom: 6px; }
+  .effect-card .eff-name {
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 0.95rem;
+    text-transform: capitalize;
+  }
+  .effect-card .eff-count {
+    font-size: 0.65rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-top: 4px;
+  }
+
+  /* ── LINKS PAGE ── */
+  #page-links .content {
+    max-width: 640px;
+    line-height: 1.7;
+  }
+  #page-links h2 { font-family: 'Fredoka One', 'Comfortaa', cursive; font-size: 1.8rem; color: var(--accent); margin-bottom: 16px; }
+  #page-links h3 { font-family: 'Fredoka One', 'Comfortaa', cursive; color: var(--text); margin: 24px 0 10px; font-size: 1.2rem; }
+  #page-links p { color: var(--muted); margin-bottom: 10px; }
+  #page-links .observer-tag {
+    display: inline-block;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 560px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    transform: scale(0.95);
+    transition: transform .25s;
+    position: relative;
+  }
+  .modal-overlay.show .modal { transform: scale(1); }
+
+  .modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+  }
+  .modal-close:hover { color: var(--text); border-color: var(--text); }
+
+  .modal h2 { font-family: 'Fredoka One', 'Comfortaa', cursive; font-size: 1.6rem; margin-bottom: 4px; }
+  .modal .modal-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+  }
+
+  .cat-placeholder {
+    width: 100%;
+    height: 160px;
+    background: var(--bg3);
+    border-radius: 10px;
+    border: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 2.5rem;
+    margin-bottom: 18px;
+    gap: 6px;
+  }
+  .cat-placeholder span { font-size: 0.75rem; font-family: 'Space Mono', monospace; }
+
+  .modal .effects-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .modal .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin: 16px 0 8px;
+  }
+
+  /* effect modal */
+  .effect-modal-emoji { font-size: 3rem; text-align: center; margin-bottom: 8px; }
+  .effect-modal-name {
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 1.8rem;
+    text-align: center;
+    text-transform: capitalize;
+    margin-bottom: 4px;
+  }
+  .effect-modal-desc {
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+  }
+  .effect-strains-list { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ── page subtitle ── */
+  .page-header { margin-bottom: 24px; }
+  .page-header h1 { font-family: 'Fredoka One', 'Comfortaa', cursive; font-size: 1.8rem; color: var(--accent); margin-bottom: 4px; }
+  .page-header p { color: var(--muted); font-size: 0.85rem; font-family: 'Space Mono', monospace; }
+
+  /* Force Comfortaa for non-Latin scripts */
+  :lang(pl) .effect-bubble,
+  :lang(pl) .eff-name,
+  :lang(pl) .effect-modal-name,
+  :lang(pl) .strain-card h3,
+  :lang(pl) .logo {
+    font-family: 'Comfortaa', cursive;
+  }
+
+
+  /* ── WELCOME OVERLAY ── */
+  .welcome-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,14,0.97);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn .5s ease;
+  }
+  .welcome-overlay.hide {
+    animation: fadeOut .4s ease forwards;
+  }
+  @keyframes fadeOut { to { opacity: 0; pointer-events: none; } }
+
+  .welcome-box {
+    max-width: 580px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  body[lang="pl"] .form-title,
+  body[lang="pl"] .join-title,
+  body[lang="pl"] #page-links h2,
+  body[lang="pl"] #page-links h3,
+  body[lang="ru"] .form-title,
+  body[lang="ru"] .join-title,
+  body[lang="ru"] #page-links h2,
+  body[lang="ru"] #page-links h3 {
+    font-family: 'Comfortaa', cursive;
+  }
+
+  [lang="pl"] .welcome-title,
+  [lang="pl"] .welcome-logo,
+  [lang="pl"] .welcome-btn,
+  [lang="ru"] .welcome-title,
+  [lang="ru"] .welcome-logo,
+  [lang="ru"] .welcome-btn {
+    font-family: 'Comfortaa', cursive;
+  }
+
+  .welcome-logo {
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 2.2rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+
+  .welcome-lang {
+    display: flex;
+    gap: 6px;
+  }
+  .wlang {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .wlang:hover { color: var(--text); border-color: var(--text); }
+  .wlang.active { color: var(--accent); border-color: var(--accent); background: rgba(200,245,100,0.08); }
+
+  .welcome-title {
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    color: var(--text);
+    line-height: 1.3;
+    font-weight: 400;
+  }
+  .welcome-title em {
+    color: var(--accent);
+    font-style: normal;
+  }
+
+  .welcome-sub {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    max-width: 480px;
+  }
+
+  .welcome-btn {
+    background: var(--accent);
+    color: #0e0e12;
+    border: none;
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 1.1rem;
+    padding: 14px 36px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    box-shadow: 0 4px 20px rgba(200,245,100,0.3);
+  }
+  .welcome-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(200,245,100,0.45);
+  }
+
+  .welcome-footer {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+
+
+  /* ── LINKS PAGE ── */
+  [lang="pl"] .join-title,
+  [lang="pl"] .form-title,
+  [lang="pl"] #page-links h2,
+  [lang="pl"] #page-links h3,
+  [lang="ru"] .join-title,
+  [lang="ru"] .form-title,
+  [lang="ru"] #page-links h2,
+  [lang="ru"] #page-links h3 {
+    font-family: 'Comfortaa', cursive;
+  }
+
+  .links-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    max-width: 1100px;
+  }
+  #page-links .content { max-width: 100%; }
+  #page-links h2 { font-family: 'Fredoka One', 'Comfortaa', cursive; font-size: 1.8rem; color: var(--accent); margin-bottom: 16px; }
+  #page-links h3 { font-family: 'Fredoka One', 'Comfortaa', cursive; color: var(--text); margin: 24px 0 10px; font-size: 1.2rem; }
+  #page-links p { color: var(--muted); margin-bottom: 10px; line-height: 1.7; }
+  #page-links .observer-tag {
+    display: inline-block;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .join-box {
+    background: var(--bg3);
+    border: 1px solid var(--accent);
+    border-radius: var(--r);
+    padding: 20px;
+    margin-top: 24px;
+    text-align: center;
+  }
+  .join-emoji { font-size: 2rem; margin-bottom: 8px; }
+  .join-title { font-family: 'Fredoka One', 'Comfortaa', cursive; color: var(--accent) !important; margin: 0 0 8px !important; }
+  .join-text { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin: 0 !important; }
+
+  /* Share form */
+  .share-form-wrap { }
+  .form-title { font-family: 'Fredoka One', 'Comfortaa', cursive; font-size: 1.8rem; color: var(--accent); margin-bottom: 8px; }
+  .form-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; line-height: 1.6; }
+  .share-form { display: flex; flex-direction: column; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text);
+  }
+  .required { color: #ff6b6b; }
+  .optional { color: var(--muted); font-size: 0.65rem; }
+  .form-group input, .form-group textarea {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color .2s;
+    resize: vertical;
+  }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .effects-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 4px;
+  }
+  .effect-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--bg3);
+    border: 1px solid;
+    border-radius: 20px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    transition: background .15s;
+  }
+  .effect-checkbox:hover { background: var(--bg2); }
+  .effect-checkbox input { display: none; }
+  .effect-checkbox:has(input:checked) { background: rgba(200,245,100,0.1); border-color: var(--accent) !important; }
+  .submit-btn {
+    background: var(--accent);
+    color: #0e0e12;
+    border: none;
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 1.1rem;
+    padding: 12px 32px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    align-self: flex-start;
+    box-shadow: 0 4px 16px rgba(200,245,100,0.25);
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,245,100,0.4); }
+
+  @media (max-width: 800px) {
+    [lang="pl"] .join-title,
+  [lang="pl"] .form-title,
+  [lang="pl"] #page-links h2,
+  [lang="pl"] #page-links h3,
+  [lang="ru"] .join-title,
+  [lang="ru"] .form-title,
+  [lang="ru"] #page-links h2,
+  [lang="ru"] #page-links h3 {
+    font-family: 'Comfortaa', cursive;
+  }
+
+  .links-layout { grid-template-columns: 1fr; }
+  }
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+  footer a { color: var(--muted); text-decoration: underline; }
+  footer a:hover { color: var(--accent); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 700px) {
+    header { padding: 14px 16px; }
+    .page { padding: 12px; }
+    #page-map .layout { grid-template-columns: 1fr; }
+    .map-sidebar { max-height: 300px; }
+    .effects-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 7px; }
+    .effect-bubble { font-size: 0.68rem; padding: 2px 7px; }
+    .strains-grid { grid-template-columns: 1fr; }
+    .strain-card { padding: 14px; }
+    .modal { padding: 20px 16px; }
+    .effect-strains-list .strain-pill { font-size: 0.68rem; padding: 3px 8px; }
+  }
+</style>
+</head>
+<body>
+
+
+<!-- WELCOME OVERLAY -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-box">
+    <div class="welcome-logo">🐈‍⬛ EFECTO</div>
+    <div class="welcome-lang">
+      <button onclick="setWelcomeLang('en')" class="wlang active" id="wl-en">EN</button>
+      <button onclick="setWelcomeLang('de')" class="wlang" id="wl-de">DE</button>
+      <button onclick="setWelcomeLang('ru')" class="wlang" id="wl-ru">RU</button>
+      <button onclick="setWelcomeLang('pl')" class="wlang" id="wl-pl">PL</button>
+    </div>
+    <h1 class="welcome-title" id="welcome-title">Are you curious about the <em>effects</em> that different cannabis strains actually cause?</h1>
+    <p class="welcome-sub" id="welcome-sub">Explore a hand-built atlas of 25 strains and 38 observed effects — collected by one observer across 9 cities. Share your own experience or join a community of curious researchers.</p>
+    <button class="welcome-btn" onclick="closeWelcome()" id="welcome-btn">Explore the Atlas →</button>
+    <div class="welcome-footer" id="welcome-footer">Share your experience with the world</div>
+  </div>
+</div>
+
+<header>
+  <div class="logo" onclick="showPage('map')" style="cursor:pointer">🐈‍⬛ EFECTO <span>The Strain Atlas</span></div>
+  <nav>
+    <button class="active" onclick="showPage('map')">Map</button>
+    <button onclick="showPage('strains')">Strains</button>
+    <button onclick="showPage('effects')">Effects</button>
+    <button onclick="showPage('links')">Links</button>
+  </nav>
+  <div class="lang-switcher" id="langSwitcher"></div>
+</header>
+
+<!-- MAP PAGE -->
+<div id="page-map" class="page active">
+  <div class="layout">
+    <div class="map-wrap">
+      <svg id="europe-map" viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg">
+        <!-- Simplified Europe paths -->
+        <g id="countries"></g>
+        <g id="city-dots"></g>
+      </svg>
+      <div class="city-popup" id="cityPopup"></div>
+    </div>
+    <div class="map-sidebar">
+      <div class="sidebar-tabs">
+        <button class="active" id="tab-map" onclick="switchTab('map')">Map</button>
+        <button id="tab-list" onclick="switchTab('list')">List</button>
+      </div>
+      <div class="sidebar-content" id="sidebarContent">
+        <h3 id="sidebarTitle">Click a city →</h3>
+        <div id="sidebarBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STRAINS PAGE -->
+<div id="page-strains" class="page">
+  <div class="page-header">
+    <h1>Strains</h1>
+    <p>25 documented strains — click any to explore</p>
+  </div>
+  <div class="strains-grid" id="strainsGrid"></div>
+</div>
+
+<!-- EFFECTS PAGE -->
+<div id="page-effects" class="page">
+  <div class="page-header">
+    <h1>Effects</h1>
+    <p>38 observed effects — click to see which strains cause them</p>
+  </div>
+  <div class="effects-grid" id="effectsGrid"></div>
+</div>
+
+<!-- LINKS PAGE -->
+<div id="page-links" class="page">
+  <div class="links-layout">
+    <div class="content">
+      <h2 id="about-title">About EFECTO</h2>
+      <div class="observer-tag" id="observer-tag">🔬 Not an expert. An observer.</div>
+      <p id="about-p1">This project started as personal notes — a habit of writing down what I noticed after each session. Strain name, effects, location, context. After 130+ documented strains across multiple countries, the patterns became too interesting to keep private.</p>
+      <p id="about-p2">The data here represents 25 of the most interesting strains from that archive. One observer, one consistent methodology, confirmed and challenged by friends during shared sessions.</p>
+      <h3 id="why-effects-title">Why effects?</h3>
+      <p id="about-p3">Strain names and THC percentages tell you almost nothing about what an experience will actually feel like. Effects are what matters. This atlas is built around that idea.</p>
+      <h3 id="future-title">The future</h3>
+      <p id="about-p4">The long-term goal is a community app where everyone can log effects on a 0–5 scale for any strain they try. Over time, the data becomes genuinely useful: looking for something to help you sleep? Filter by sleepy.</p>
+      <div class="join-box">
+        <div class="join-emoji">🧪</div>
+        <h3 class="join-title" id="join-title">Join the research team</h3>
+        <p class="join-text" id="join-text">We are looking for curious people — developers, designers, or just enthusiastic cannabis researchers — who want to help build the world's most honest strain effects database. If that sounds like you, get in touch.</p>
+      </div>
+      <h3 id="contact-title">Contact</h3>
+      <p style="color: var(--text)">Found at Mary Jane Berlin 2026 🇩🇪</p>
+      <p><a href="mailto:wk@mail.ee" style="color:var(--accent)">wk@mail.ee</a></p>
+    </div>
+    <div class="share-form-wrap">
+      <h2 class="form-title" id="form-title">Share your experience</h2>
+      <p class="form-sub" id="form-sub">Tried a strain? Tell us what you felt. Your observations help build a better atlas.</p>
+      <form class="share-form" action="https://formspree.io/f/xvznkyea" method="POST">
+        <div class="form-group">
+          <label id="label-name">Name <span class="optional">(optional)</span></label>
+          <input type="text" name="name" placeholder="Your name or nickname">
+        </div>
+        <div class="form-group">
+          <label id="label-strain">Strain name <span class="required">*</span></label>
+          <input type="text" name="strain" placeholder="e.g. Blue Dream" required>
+        </div>
+        <div class="form-group">
+          <label id="label-city">City <span class="required">*</span></label>
+          <input type="text" name="city" placeholder="e.g. Berlin" required>
+        </div>
+        <div class="form-group">
+          <label id="label-effects">Effects <span class="required">*</span></label>
+          <div class="effects-checkboxes" id="effectsCheckboxes"></div>
+        </div>
+        <div class="form-group">
+          <label id="label-notes">Notes <span class="optional">(optional)</span></label>
+          <textarea name="notes" rows="3" placeholder="Anything else you noticed..."></textarea>
+        </div>
+        <button type="submit" class="submit-btn" id="submit-btn">Send →</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>const STRAINS = [
+  {
+    id: "amnesia-haze",
+    name: "Amnesia Haze",
+    type: "Sativa",
+    thc: 21, cbd: 0,
+    city: "Amsterdam",
+    effects: ["active","energetic","forgetful","giggly","talkative"]
+  },
+  {
+    id: "ice-cream-cake",
+    name: "Ice Cream Cake",
+    type: "Hybrid",
+    thc: 23, cbd: 0,
+    city: "Katowice",
+    effects: ["anxious","energetic","great","high","reflective","relaxed","sleepy","tingly"]
+  },
+  {
+    id: "runtz",
+    name: "Runtz",
+    type: "Hybrid",
+    thc: 24, cbd: 1,
+    city: "Katowice",
+    effects: ["active","happy","high","relaxed","tuned"]
+  },
+  {
+    id: "zkittlez",
+    name: "Zkittlez",
+    type: "Hybrid",
+    thc: 21, cbd: 1,
+    city: "Katowice",
+    effects: ["happy","high","relaxed","restless","sleepy","talkative"]
+  },
+  {
+    id: "moby-dick",
+    name: "Moby Dick",
+    type: "Hybrid",
+    thc: 22, cbd: 0,
+    city: "Warsaw",
+    effects: ["active","creative","energetic","high","hungry","light","productive","talkative"]
+  },
+  {
+    id: "sour-diesel",
+    name: "Sour Diesel",
+    type: "Sativa",
+    thc: 20, cbd: 0,
+    city: "Budapest",
+    effects: ["high","light","reflective","sleepy"]
+  },
+  {
+    id: "gorilla-glue",
+    name: "Gorilla Glue",
+    type: "Indica",
+    thc: 24, cbd: 0,
+    city: "Minsk",
+    effects: ["couchlocked","reflective","relaxed","sleepy","unmotivated"]
+  },
+  {
+    id: "og-kush",
+    name: "OG Kush",
+    type: "Hybrid",
+    thc: 21, cbd: 0,
+    city: "Minsk",
+    effects: ["couchlocked","high","reflective","sleepy","unmotivated"]
+  },
+  {
+    id: "pineapple-express",
+    name: "Pineapple Express",
+    type: "Hybrid",
+    thc: 20, cbd: 0,
+    city: "Minsk",
+    effects: ["creative","giggly","productive","relaxed"]
+  },
+  {
+    id: "white-widow",
+    name: "White Widow",
+    type: "Hybrid",
+    thc: 18, cbd: 0,
+    city: "Minsk",
+    effects: ["foggy","headache","high","paranoid","reflective","sleepy","talkative","couchlocked"]
+  },
+  {
+    id: "lemon-cherry-gelato",
+    name: "Lemon Cherry Gelato",
+    type: "Hybrid",
+    thc: 25, cbd: 0,
+    city: "Berlin",
+    effects: ["dry mouth","foggy","forgetful","giggly","great","happy","high","optimistic","relaxed","sleepy","talkative","thirsty","tingly"]
+  },
+  {
+    id: "lemonesia",
+    name: "Lemonesia",
+    type: "Hybrid",
+    thc: 20, cbd: 0,
+    city: "Berlin",
+    effects: ["coughing","creative","energetic","forgetful","hungry","light","talkative"]
+  },
+  {
+    id: "panna-cotta",
+    name: "Panna Cotta",
+    type: "Indica",
+    thc: 23, cbd: 0,
+    city: "Stettin",
+    effects: ["creative","high","hungry","relaxed","talkative"]
+  },
+  {
+    id: "jealousy",
+    name: "Jealousy",
+    type: "Hybrid",
+    thc: 25, cbd: 1,
+    city: "Danzig",
+    effects: ["active","anxious","coughing","creative","foggy","happy","high","light","nausea","paranoid","reflective","relaxed","sleepy","talkative","tingly"]
+  },
+  {
+    id: "orange-bud",
+    name: "Orange Bud",
+    type: "Hybrid",
+    thc: 17, cbd: 0,
+    city: "Danzig",
+    effects: ["active","creative","energetic","headache","productive","talkative"]
+  },
+  {
+    id: "tropicana-banana",
+    name: "Tropicana Banana",
+    type: "Hybrid",
+    thc: 25, cbd: 0,
+    city: "Danzig",
+    effects: ["creative","great","happy","high","optimistic","talkative"]
+  },
+  {
+    id: "tropicana-cookies",
+    name: "Tropicana Cookies",
+    type: "Hybrid",
+    thc: 23, cbd: 0,
+    city: "Danzig",
+    effects: ["euphoric","happy","high","hungry","optimistic","talkative"]
+  },
+  {
+    id: "cherry-pie",
+    name: "Cherry Pie",
+    type: "Indica",
+    thc: 21, cbd: 0,
+    city: "Breslau",
+    effects: ["coughing","creative","giggly","rapid pulse","relaxed","talkative"]
+  },
+  {
+    id: "blue-dream",
+    name: "Blue Dream",
+    type: "Hybrid",
+    thc: 18, cbd: 2,
+    city: "Breslau",
+    effects: ["comfy","creative","dreamy","great","happy","hungry","optimistic","peaceful","relaxed","tingly","tuned"]
+  },
+  {
+    id: "euphoria-cookies",
+    name: "Euphoria Cookies",
+    type: "Hybrid",
+    thc: 22, cbd: 0,
+    city: "Breslau",
+    effects: ["comfy","dreamy","euphoric","happy","light","reflective","sleepy","tuned","unmotivated"]
+  },
+  {
+    id: "permanent-marker",
+    name: "Permanent Marker",
+    type: "Indica",
+    thc: 26, cbd: 1,
+    city: "Breslau",
+    effects: ["comfy","creative","foggy","happy","high","light","peaceful","sleepy","tuned"]
+  },
+  {
+    id: "grandaddy-purple",
+    name: "Grandaddy Purple",
+    type: "Indica",
+    thc: 20, cbd: 0,
+    city: "Breslau",
+    effects: ["chilled","comfy","couchlocked","creative","dizzy","dry mouth","hungry","relaxed","sleepy","talkative","tuned"]
+  },
+  {
+    id: "strawberry-cough",
+    name: "Strawberry Cough",
+    type: "Hybrid",
+    thc: 19, cbd: 0,
+    city: "Breslau",
+    effects: ["coughing","euphoric","forgetful","giggly","happy","relaxed","talkative","tingly","tuned"]
+  },
+  {
+    id: "watermelon-z",
+    name: "Watermelon Z",
+    type: "Indica",
+    thc: 24, cbd: 0,
+    city: "Breslau",
+    effects: ["creative","dry mouth","euphoric","giggly","happy","talkative"]
+  },
+  {
+    id: "acapulco-gold",
+    name: "Acapulco Gold",
+    type: "Sativa",
+    thc: 19, cbd: 0,
+    city: "Breslau",
+    effects: ["foggy","light","talkative"]
+  }
+  // ← PASTE NEW STRAINS HERE
+];
+
+const EFFECT_NAMES = {
+  de: {
+    comfy:"gemütlich",
+    active:"aktiv",anxious:"ängstlich",chilled:"kalt",couchlocked:"couchlocked",
+    coughing:"hustend",creative:"kreativ",clear:"klar",dizzy:"schwindelig",
+    dreamy:"verträumt","dry mouth":"trockener Mund",energetic:"energetisch",
+    euphoric:"euphorisch",foggy:"benebelt",forgetful:"vergesslich",frisky:"verspielt",
+    giggly:"kichernd",great:"spitze",happy:"glücklich",headache:"Kopfschmerzen",
+    hungry:"hungrig",high:"high",light:"leicht",nausea:"Übelkeit",optimistic:"optimistisch",
+    paranoid:"paranoid",peaceful:"friedlich",productive:"produktiv","rapid pulse":"schneller Puls",
+    reflective:"nachdenklich",relaxed:"gedämpft",restless:"ruhelos","red eyes":"rote Augen",
+    sleepy:"schläfrig",talkative:"gesprächig",tingly:"kribbelig",thirsty:"durstig",
+    tuned:"Musikgefühl",unmotivated:"unmotiviert"
+  },
+  ru: {
+    comfy:"уют",
+    active:"активность",anxious:"тревога",chilled:"озноб",couchlocked:"диванный режим",
+    coughing:"кашель",creative:"творчество",clear:"ясность",dizzy:"головокружение",
+    dreamy:"мечтательность","dry mouth":"сухость во рту",energetic:"энергичность",
+    euphoric:"эйфория",foggy:"туман",forgetful:"забывчивость",frisky:"влечение",
+    giggly:"смех",great:"топовый",happy:"счастье",headache:"головная боль",
+    hungry:"голод",high:"полёт",light:"лёгкость",nausea:"тошнота",optimistic:"оптимизм",
+    paranoid:"паранойя",peaceful:"умиротворение",productive:"продуктивность","rapid pulse":"учащённый пульс",
+    reflective:"задумчивость",relaxed:"расслабление",restless:"беспокойство","red eyes":"красные глаза",
+    sleepy:"сонливость",talkative:"разговорчивость",tingly:"покалывание",thirsty:"жажда",
+    tuned:"улучшение музыки",unmotivated:"лень"
+  },
+  pl: {
+    comfy:"przytulność",
+    active:"aktywność",anxious:"niepokój",chilled:"dreszcze",couchlocked:"przykucie do kanapy",
+    coughing:"kaszel",creative:"kreatywność",clear:"klarowność",dizzy:"zawroty głowy",
+    dreamy:"marzycielskość","dry mouth":"suchość w ustach",energetic:"energia",
+    euphoric:"euforia",foggy:"zamglenie",forgetful:"zapominalstwo",frisky:"pobudzenie",
+    giggly:"śmiech",great:"topowy",happy:"szczęście",headache:"ból głowy",
+    hungry:"głód",high:"high",light:"lekkość",nausea:"nudności",optimistic:"optymizm",
+    paranoid:"paranoja",peaceful:"spokój",productive:"produktywność","rapid pulse":"szybkie tętno",
+    reflective:"refleksyjność",relaxed:"relaks",restless:"niepokój","red eyes":"czerwone oczy",
+    sleepy:"senność",talkative:"gadatliwość",tingly:"mrowienie",thirsty:"pragnienie",
+    tuned:"jakość muzyki",unmotivated:"brak motywacji"
+  }
+};
+
+function effName(ef) {
+  if (currentLang === 'en') return ef === 'great' ? 'top-notch' : ef;
+  return (EFFECT_NAMES[currentLang] && EFFECT_NAMES[currentLang][ef]) || ef;
+}
+
+const EFFECT_DESCS = {
+  de: {
+    comfy:"Ein warmes, gemütliches Gefühl — wie in eine Decke gehüllt. Sicher, weich, vollkommen entspannt.",
+    active:"Ein Schub körperlicher Energie — du willst dich bewegen, spazieren gehen, Dinge tun.",
+    anxious:"Leichte Sorgen oder Unbehagen schleichen sich ein. Rastlose Gedanken, leichte Anspannung.",
+    chilled:"Leichtes oder starkes Frösteln, das plötzlich beginnt und genauso plötzlich aufhört. Manchmal hilft nur das Einwickeln in drei Decken.",
+    couchlocked:"Der Körper wird so schwer und bequem, dass Bewegung unnötig und schwierig erscheint — und dein Hintern scheint regelrecht am Sofa festgeklebt zu sein.",
+    coughing:"Spürbare Reizung im Hals oder in der Lunge, die während oder nach der Session zu Husten führt.",
+    creative:"Ideen fließen frei. Verbindungen zwischen unzusammenhängenden Dingen fühlen sich offensichtlich an.",
+    clear:"Der Geist fühlt sich ungewöhnlich scharf und aufgeräumt an. Gedanken sind präzise, nicht zerstreut.",
+    dizzy:"Leichter Schwindel, besonders beim Aufstehen. Meist kurz.",
+    dreamy:"Gedanken treiben sanft wie Wolken. Die Realität fühlt sich leicht entrückt an, angenehm surreal.",
+    "dry mouth":"Klassischer Mundtrockenheit. Speichel verschwindet schnell — Wasser bereithalten.",
+    energetic:"Mentale und körperliche Energie steigt. Gut für Spaziergänge, Gespräche, Aktivitäten.",
+    euphoric:"Eine Welle echter Freude und Wohlbefinden, die sich fast zu gut anfühlt, um wahr zu sein.",
+    foggy:"Gedanken fühlen sich in Watte gewickelt an. Die Verarbeitung verlangsamt sich.",
+    forgetful:"Das Kurzzeitgedächtnis macht Urlaub. Pausen mitten im Satz häufen sich.",
+    frisky:"Eine spielerische, flirty Energie. Gesteigertes Sinnesbewusstsein und leichte Erregung.",
+    giggly:"Alles wird lustiger als es sein sollte. Lachen kommt leicht und oft.",
+    great:"Ein Effekt, der nur bei außergewöhnlich guten Sorten auftritt. Alles ist nicht nur gut — es ist schlicht spitze.",
+    happy:"Einfaches, reines Glück. Die Welt fühlt sich freundlicher an.",
+    headache:"Druck oder Schmerz um die Schläfen, meist durch Dehydrierung.",
+    hungry:"Der Heißhunger setzt stark ein. Alles sieht und riecht fantastisch aus.",
+    high:"Der klassische psychoaktive Effekt. Der Geist hebt ab. Die Wahrnehmung verschiebt sich. Bewegung von unten nach oben.",
+    light:"Der Körper fühlt sich schwerelos an, fast schwebend.",
+    nausea:"Magenunbehagen, manchmal mit Schwindel. Meist bei zu viel, zu schnell.",
+    optimistic:"Probleme schrumpfen, Möglichkeiten wachsen. Die Zukunft fühlt sich offen an.",
+    paranoid:"Misstrauische Gedanken verstärken sich. Du fühlst dich beobachtet oder beurteilt. Manchmal fühlen sich schreckliche Gedanken über den Tod oder das Ende der Welt erschreckend real an.",
+    peaceful:"Tiefe innere Stille. Kein Drang, irgendetwas zu reparieren.",
+    productive:"Aufgaben fühlen sich interessant und machbar an. Der Fokus schließt sich auf eine Sache.",
+    "rapid pulse":"Die Herzfrequenz steigt spürbar. Meist harmlos, kann sich aber beunruhigend anfühlen.",
+    reflective:"Gedanken wenden sich nach innen. Vergangene Ereignisse, Entscheidungen tauchen auf.",
+    relaxed:"Muskeln entspannen, Schultern sinken, Kiefer löst sich. Der Körper erinnert sich ans Ruhen.",
+    restless:"Kann sich nicht ganz beruhigen. Geist oder Körper bewegt sich weiter.",
+    "red eyes":"Die Bindehautgefäße weiten sich — klassisch rote Augen.",
+    sleepy:"Die Augenlider werden schwer. Gähnen beginnt. Die Couch wird sehr überzeugend.",
+    talkative:"Worte kommen leicht. Gespräche fließen. Stille fühlt sich unnötig an.",
+    tingly:"Sanfte elektrische Empfindung, meist in Händen, Füßen oder der Kopfhaut. Angenehm. Eine Art Euphorie.",
+    thirsty:"Plötzlicher, intensiver Durst. Wasser wird zum Wichtigsten im Raum.",
+    tuned:"Tief eingestimmt — Musik klingt reicher, Details springen heraus.",
+    unmotivated:"Die To-Do-Liste wird theoretisch. Alles kann warten. Der Ehrgeiz macht ein Nickerchen."
+  },
+  ru: {
+    comfy:"Тёплое, уютное ощущение — как будто завернулся в одеяло. Безопасно, мягко, совершенно комфортно.",
+    active:"Всплеск физической энергии — хочется двигаться, гулять, что-то делать. Тело бодрое и готово к действию.",
+    anxious:"Лёгкое беспокойство и тревога. Мысли ускоряются, небольшое напряжение. Обычно проходит быстро.",
+    chilled:"Состояние лёгкого или сильного озноба, которое неожиданно начинается и так же неожиданно заканчивается. Иногда помогает укутывание только в три одеяла.",
+    couchlocked:"Тело становится таким тяжёлым и удобным, что двигаться кажется ненужным и сложным. А ваша попа кажется «приклеенной» к дивану.",
+    coughing:"Заметное раздражение горла или лёгких, вызывающее кашель во время или после сессии.",
+    creative:"Идеи текут свободно. Связи между несвязанными вещами кажутся очевидными. Творить — в удовольствие.",
+    clear:"Разум ощущается необычно острым и незахламлённым. Мысли точные, не рассеянные.",
+    dizzy:"Лёгкое головокружение, особенно при вставании. Обычно кратковременное.",
+    dreamy:"Мысли дрейфуют мягко, как облака. Реальность кажется чуть далёкой, приятно сюрреалистичной.",
+    "dry mouth":"Классическая сухость во рту. Слюна исчезает быстро — держи воду под рукой.",
+    energetic:"Умственная и физическая энергия возрастает. Хорошо для прогулок, разговоров, активностей.",
+    euphoric:"Волна искреннего счастья и благополучия, которая кажется почти слишком хорошей.",
+    foggy:"Мысли как будто завёрнуты в вату. Обработка информации замедляется.",
+    forgetful:"Краткосрочная память уходит в отпуск. Паузы на полуслове учащаются.",
+    frisky:"Игривая, флиртующая энергия. Повышенная чувственность и лёгкое возбуждение.",
+    giggly:"Всё становится смешнее, чем должно быть. Смех приходит легко и часто.",
+    great:"Эффект применимый только к исключительно хорошим сортам. Всё не просто хорошо — всё топовое.",
+    happy:"Простое, чистое счастье. Мир кажется дружелюбнее и понятнее.",
+    headache:"Давление или боль в висках, обычно от обезвоживания или резкого скачка ТГК.",
+    hungry:"Жор приходит всерьёз. Всё выглядит и пахнет потрясающе. Аппетит усилен.",
+    high:"Классический психоактивный эффект. Разум взлетает. Восприятие меняется. Ты знаешь, что в кайфе. Движение снизу вверх.",
+    light:"Тело ощущается невесомым, почти парящим. Лёгкость без усилий.",
+    nausea:"Дискомфорт в желудке, иногда с головокружением. Обычно от слишком много, слишком быстро.",
+    optimistic:"Проблемы уменьшаются, возможности растут. Будущее кажется открытым и по-настоящему обнадёживающим.",
+    paranoid:"Подозрительные мысли усиливаются. Ощущение что за тобой наблюдают или осуждают. Иногда кажутся действительно реальными ужасные мысли о смерти или конце света.",
+    peaceful:"Глубокая внутренняя тишина. Нет желания ничего исправлять. Просто тихое довольство.",
+    productive:"Задачи кажутся интересными и выполнимыми. Фокус удерживается на одной вещи.",
+    "rapid pulse":"Частота сердечных сокращений заметно увеличивается. Обычно безвредно, но может пугать.",
+    reflective:"Мысли обращаются внутрь. Прошлые события, решения, смыслы всплывают и кажутся важными.",
+    relaxed:"Мышцы расслабляются, плечи опускаются, челюсть размыкается. Тело вспоминает как отдыхать.",
+    restless:"Не можешь толком осесть. Разум или тело продолжают двигаться в поисках чего-то.",
+    "red eyes":"Сосуды конъюнктивы расширяются — классические красные глаза.",
+    sleepy:"Веки тяжелеют. Зевота начинается. Диван становится очень убедительным.",
+    talkative:"Слова приходят легко. Разговоры текут. Тишина кажется ненужной и избыточной.",
+    tingly:"Нежное электрическое ощущение, обычно в руках, ногах или коже головы. Приятное. Вид эйфории.",
+    thirsty:"Внезапная, сильная жажда. Вода становится самым важным в комнате.",
+    tuned:"Глубоко настроен — музыка звучит богаче, детали выплывают, присутствие усиливается.",
+    unmotivated:"Список дел становится теоретическим. Всё может подождать. Амбиции засыпают."
+  },
+  pl: {
+    comfy:"Ciepłe, przytulne uczucie — jakbyś był owinięty w koc. Bezpiecznie, miękko, całkowicie swobodnie.",
+    active:"Przypływ energii fizycznej — chcesz się ruszać, spacerować, robić rzeczy. Ciało czujne i gotowe.",
+    anxious:"Lekki niepokój i napięcie. Myśli przyspieszają. Zwykle szybko mija.",
+    chilled:"Stan lekkiego lub silnego dreszczu, który niespodziewanie zaczyna się i tak samo niespodziewanie kończy. Czasem pomaga tylko owinięcie się w trzy kołdry.",
+    couchlocked:"Ciało staje się tak ciężkie i wygodne, że ruszanie się wydaje się zbędne i trudne — a twój tyłek wydaje się być przyklejony do kanapy.",
+    coughing:"Wyraźne podrażnienie gardła lub płuc prowadzące do kaszlu podczas lub po sesji.",
+    creative:"Pomysły płyną swobodnie. Połączenia między niezwiązanymi rzeczami wydają się oczywiste.",
+    clear:"Umysł wydaje się niezwykle ostry i przejrzysty. Myśli precyzyjne, nie rozproszone.",
+    dizzy:"Łagodne zawroty głowy, szczególnie przy wstawaniu. Zwykle krótkie.",
+    dreamy:"Myśli dryfują miękko jak chmury. Rzeczywistość wydaje się lekko odległa, przyjemnie surrealistyczna.",
+    "dry mouth":"Klasyczna suchość w ustach. Ślina znika szybko — miej wodę pod ręką.",
+    energetic:"Energia umysłowa i fizyczna rośnie. Dobre do spacerów, rozmów, aktywności.",
+    euphoric:"Fala prawdziwego szczęścia i dobrostanu, która wydaje się prawie zbyt dobra, by była prawdziwa.",
+    foggy:"Myśli jak owinięte w watę. Przetwarzanie zwalnia, trudno myśleć jasno.",
+    forgetful:"Pamięć krótkotrwała jedzie na wakacje. Przerwy w połowie zdania stają się częste.",
+    frisky:"Figlarno-flirciarska energia. Zwiększona świadomość zmysłowa i łagodne pobudzenie.",
+    giggly:"Wszystko staje się śmieszniejsze niż powinno. Śmiech przychodzi łatwo i często.",
+    great:"Efekt stosowany tylko do wyjątkowo dobrych odmian. Wszystko nie jest po prostu dobre — jest po prostu topowe.",
+    happy:"Proste, czyste szczęście. Świat wydaje się bardziej przyjazny i zrozumiały.",
+    headache:"Ucisk lub ból wokół skroni, zwykle od odwodnienia lub skoku THC.",
+    hungry:"Wilczy apetyt przychodzi na serio. Wszystko wygląda i pachnie niesamowicie.",
+    high:"Klasyczny efekt psychoaktywny. Umysł startuje. Percepcja się zmienia. Wiesz, że jesteś na haju. Ruch z dołu do góry.",
+    light:"Ciało czuje się nieważkie, prawie unoszące się. Lekkość bez wysiłku.",
+    nausea:"Dyskomfort żołądkowy, czasem z zawrotami głowy. Zwykle od za dużo, za szybko.",
+    optimistic:"Problemy maleją, możliwości rosną. Przyszłość wydaje się otwarta i naprawdę obiecująca.",
+    paranoid:"Podejrzliwe myśli się nasilają. Czujesz się obserwowany lub oceniany. Czasem przerażające myśli o śmierci lub końcu świata wydają się naprawdę realne.",
+    peaceful:"Głęboka wewnętrzna cisza. Żadnego impulsu, by cokolwiek naprawiać. Tylko spokój.",
+    productive:"Zadania wydają się interesujące i wykonalne. Skupienie zatrzymuje się na jednej rzeczy.",
+    "rapid pulse":"Częstość akcji serca wyraźnie wzrasta. Zwykle nieszkodliwe, ale może być niepokojące.",
+    reflective:"Myśli zwracają się do wewnątrz. Przeszłe zdarzenia, decyzje, sensy wypływają na powierzchnię.",
+    relaxed:"Mięśnie miękną, ramiona opadają, szczęka się rozluźnia. Ciało przypomina sobie, jak odpoczywać.",
+    restless:"Nie możesz się uspokoić. Umysł lub ciało ciągle szuka czegoś do robienia.",
+    "red eyes":"Naczynia spojówki rozszerzają się — klasycznie czerwone oczy.",
+    sleepy:"Powieki robią się ciężkie. Ziewanie zaczyna się. Kanapa staje się bardzo przekonująca.",
+    talkative:"Słowa przychodzą łatwo. Rozmowy płyną. Cisza wydaje się zbędna.",
+    tingly:"Delikatne elektryczne uczucie, zwykle w dłoniach, stopach lub skórze głowy. Przyjemne. Rodzaj euforii.",
+    thirsty:"Nagłe, intensywne pragnienie. Woda staje się najważniejszą rzeczą w pokoju.",
+    tuned:"Głęboko nastrojony — muzyka brzmi bogatsze, detale wyskakują, obecność wzrasta.",
+    unmotivated:"Lista zadań staje się teoretyczna. Wszystko może poczekać. Ambicja idzie spać."
+  }
+};
+
+function effDesc(ef) {
+  if (currentLang === 'en') return (window.EFFECTS_DICT_EN_DESC && window.EFFECTS_DICT_EN_DESC[ef]) || EFFECTS_DICT[ef]?.desc || '';
+  return (EFFECT_DESCS[currentLang] && EFFECT_DESCS[currentLang][ef]) || EFFECTS_DICT[ef]?.desc || '';
+}
+
+const EFFECTS_DICT = {
+  active:       { emoji: "⚡", desc: "A burst of physical energy — you want to move, walk, do things. Body feels awake and ready.", color: "#FFD166" },
+  anxious:      { emoji: "😬", desc: "Mild worry or unease that creeps in. Racing thoughts, slight tension. Usually passes quickly.", color: "#FF6B9D" },
+  comfy:        { emoji: "🫶", desc: "A warm, cozy feeling — like being wrapped in a blanket. Safe, soft, perfectly at ease.", color: "#FFB347" },
+  chilled:      { emoji: "🧊", desc: "A smooth, gentle calm — not sleepy, just peacefully cool. Tension simply dissolves.", color: "#A8DADC" },
+  couchlocked:  { emoji: "🛋️", desc: "Body gets so heavy and comfortable that moving feels unnecessary and difficult.", color: "#6B4226" },
+  coughing:     { emoji: "💨", desc: "Noticeable throat or lung irritation leading to coughing during or after the session.", color: "#B5C4B1" },
+  creative:     { emoji: "🎨", desc: "Ideas flow freely. Connections between unrelated things feel obvious. Making things feels fun.", color: "#FF9F43" },
+  clear:        { emoji: "🔍", desc: "Mind feels unusually sharp and uncluttered. Thoughts are precise, not scattered.", color: "#74B9FF" },
+  dizzy:        { emoji: "🌀", desc: "Mild vertigo or spinning sensation, especially when standing up. Usually brief.", color: "#A29BFE" },
+  dreamy:       { emoji: "🌙", desc: "Thoughts drift softly like clouds. Reality feels slightly distant, pleasantly surreal.", color: "#DDA0DD" },
+  "dry mouth":  { emoji: "🏜️", desc: "Classic cotton mouth. Saliva disappears fast — keep water nearby.", color: "#F0A500" },
+  energetic:    { emoji: "🔋", desc: "Mental and physical energy kicks up. Good for walks, conversations, activities.", color: "#00B894" },
+  euphoric:     { emoji: "✨", desc: "A wave of genuine happiness and wellbeing that feels almost too good to be real.", color: "#FD79A8" },
+  foggy:        { emoji: "🌫️", desc: "Thoughts feel wrapped in cotton. Processing slows down, hard to think straight.", color: "#B2BEC3" },
+  forgetful:    { emoji: "🫧", desc: "Short-term memory takes a vacation. Mid-sentence pauses become frequent.", color: "#81ECEC" },
+  frisky:       { emoji: "😏", desc: "A playful, flirtatious energy. Heightened sensory awareness and mild arousal.", color: "#FF7675" },
+  giggly:       { emoji: "😂", desc: "Everything becomes funnier than it should be. Laughter arrives easily and often.", color: "#FDCB6E" },
+  great:        { emoji: "🌟", desc: "A general sense that everything is good. Not euphoria — just solid, quiet contentment.", color: "#55EFC4" },
+  happy:        { emoji: "😊", desc: "Simple, clean happiness. The world feels friendlier and more manageable.", color: "#FFEAA7" },
+  headache:     { emoji: "🤕", desc: "Pressure or pain around the temples or forehead, usually from dehydration or THC spike.", color: "#D63031" },
+  hungry:       { emoji: "🍕", desc: "The munchies arrive hard. Everything looks and smells amazing. Appetite amplified.", color: "#E17055" },
+  high:         { emoji: "🚀", desc: "The classic psychoactive effect. Mind lifts off. Perception shifts. You know you're high.", color: "#6C5CE7" },
+  light:        { emoji: "🪶", desc: "Body feels weightless, almost floating. Effortless physical and mental lightness.", color: "#DFE6E9" },
+  nausea:       { emoji: "🤢", desc: "Stomach discomfort, sometimes with dizziness. Usually from too much, too fast.", color: "#00B894" },
+  optimistic:   { emoji: "🌈", desc: "Problems shrink, possibilities grow. The future feels open and genuinely promising.", color: "#74B9FF" },
+  paranoid:     { emoji: "👁️", desc: "Suspicious thoughts amplify. You feel watched or judged. Deep breaths help.", color: "#2D3436" },
+  peaceful:     { emoji: "🕊️", desc: "Deep internal stillness. No urge to fix anything. Just quiet satisfaction.", color: "#B8E4F9" },
+  productive:   { emoji: "📋", desc: "Tasks feel interesting and achievable. Focus locks onto one thing at a time.", color: "#00CEC9" },
+  "rapid pulse":{ emoji: "💓", desc: "Heart rate noticeably increases. Usually harmless but can feel alarming.", color: "#FF4757" },
+  reflective:   { emoji: "🪞", desc: "Thoughts turn inward. Past events, decisions, meanings surface and feel worth examining.", color: "#636E72" },
+  relaxed:      { emoji: "🌿", desc: "Muscles soften, shoulders drop, jaw unclenches. The body remembers how to rest.", color: "#55EFC4" },
+  restless:     { emoji: "🌪️", desc: "Can't quite settle. Mind or body keeps moving, looking for something to do.", color: "#FDCB6E" },
+  sleepy:       { emoji: "😴", desc: "Eyelids get heavy. Yawning starts. The couch becomes very convincing.", color: "#74B9FF" },
+  talkative:    { emoji: "💬", desc: "Words come easy. Conversations flow. Silence feels unnecessary and avoidable.", color: "#A29BFE" },
+  tingly:       { emoji: "⚡", desc: "Gentle electric sensation, usually in hands, feet, or scalp. Pleasant body buzz.", color: "#FD79A8" },
+  thirsty:      { emoji: "💧", desc: "Sudden, intense thirst. Water becomes the most important thing in the room.", color: "#74B9FF" },
+  tuned:        { emoji: "🎵", desc: "Deeply plugged in — music sounds richer, details pop, presence increases.", color: "#A29BFE" },
+  unmotivated:  { emoji: "😑", desc: "The to-do list becomes theoretical. Everything can wait. Ambition takes a nap.", color: "#636E72" }
+};
+
+const CITIES = [
+  { name: "Amsterdam", lat: 52.37, lng: 4.90 },
+  { name: "Katowice",  lat: 50.26, lng: 19.02 },
+  { name: "Warsaw",    lat: 52.23, lng: 21.01 },
+  { name: "Budapest",  lat: 47.50, lng: 19.04 },
+  { name: "Minsk",     lat: 53.90, lng: 27.56 },
+  { name: "Berlin",    lat: 52.52, lng: 13.40 },
+  { name: "Stettin",   lat: 53.43, lng: 14.55 },
+  { name: "Danzig",    lat: 54.35, lng: 18.65 },
+  { name: "Breslau",   lat: 51.11, lng: 17.04 }
+  // ← PASTE NEW CITIES HERE
+];
+
+const TYPE_COLORS = { Sativa: "#FFD166", Indica: "#6C5CE7", Hybrid: "#00B894" };
+const TRANSLATIONS = {
+  en: {
+    tagline: "The Strain Atlas",
+    nav_map: "Map", nav_strains: "Strains", nav_effects: "Effects", nav_links: "Links",
+    strains_title: "Strains", strains_sub: "25 documented strains — click any to explore",
+    effects_title: "Effects", effects_sub: "38 observed effects — click to see which strains cause them",
+    click_city: "Click a city →",
+    effects_label: "Effects", strains_found: "strains",
+    about_title: "About EFECTO",
+    observer_tag: "🔬 Not an expert. An observer. One person, one consistent system.",
+    about_p1: "This project started as personal notes — a habit of writing down what I noticed after each session. Strain name, effects, location, context. After 130+ documented strains across multiple countries, the patterns became too interesting to keep private.",
+    about_p2: "The data here represents 25 of the most interesting strains from that archive. One observer, one consistent methodology.",
+    why_effects: "Why effects?",
+    about_p3: "Strain names and THC percentages tell you almost nothing about what an experience will actually feel like. Effects are what matters. Many of us notice the variety of effects and how different strains affect us differently. Some strains are hard to describe because there are either too many effects or they intertwine so much that it is hard to understand what is happening. Imagine you want to choose a strain for sleep? Just select the sleepy effect and see which strains caused that effect — and even where! Our app is not used, has never been used, and will never be used for selling or promoting cannabis use. It is simply a handy tool to find your favourite strains. Remember though — smoking cannabis is harmful to your health. Take care of yourself.",
+    future_title: "The future",
+    about_p4: "Our goal is a truly massive atlas of strains and effects — one that gives a real picture of the connections between them. We want to collect useful data on geography and strain popularity across the world. Each user's observation adds another data point to the map. Over time, patterns emerge that no single person could ever document alone. And of course — this is also just a fun playground for curious stoners who like to know what they're smoking. 🌿",
+    contact_title: "Contact",
+    found_at: "Found at Mary Jane Berlin 2026 🇩🇪",
+    more: "more",
+    tab_map: "Map", tab_list: "List",
+    cat_soon: "🐈 cat coming soon",
+    also_in: "Also found in:"
+  },
+  de: {
+    tagline: "Der Strain-Atlas",
+    nav_map: "Karte", nav_strains: "Sorten", nav_effects: "Effekte", nav_links: "Links",
+    strains_title: "Sorten", strains_sub: "25 dokumentierte Sorten — klicken zum Erkunden",
+    effects_title: "Effekte", effects_sub: "38 beobachtete Effekte — klicken für Sorten",
+    click_city: "Stadt anklicken →",
+    effects_label: "Effekte", strains_found: "Sorten",
+    about_title: "Über EFECTO",
+    observer_tag: "🔬 Kein Experte. Ein Beobachter. Eine Person, ein konsistentes System.",
+    about_p1: "Dieses Projekt begann als persönliche Notizen — eine Gewohnheit, aufzuschreiben, was ich nach jeder Session bemerkte. Sortenname, Effekte, Ort, Kontext. Nach 130+ dokumentierten Sorten wurden die Muster zu interessant, um sie privat zu halten.",
+    about_p2: "Die Daten hier repräsentieren 25 der interessantesten Sorten aus diesem Archiv. Ein Beobachter, eine konsistente Methodik.",
+    why_effects: "Warum Effekte?",
+    about_p3: "Sortennamen und THC-Werte sagen fast nichts darüber aus, wie sich eine Erfahrung anfühlen wird. Effekte sind das, was zählt. Viele von uns bemerken die Vielfalt der Wirkungen. Stell dir vor, du möchtest eine Sorte zum Schlafen wählen? Wähle einfach den Effekt Schläfrigkeit und schau, welche Sorten diesen Effekt hatten — und wo! Diese App wurde nicht, wird nicht und wird niemals für den Verkauf oder die Förderung von Cannabiskonsum verwendet. Denk daran: Kiffen schadet deiner Gesundheit. Pass auf dich auf.",
+    future_title: "Die Zukunft",
+    about_p4: "Unser Ziel ist ein wirklich riesiger Atlas von Sorten und Effekten — einer, der ein echtes Bild der Zusammenhänge zwischen ihnen vermittelt. Wir wollen nützliche Daten über Geographie und Sortenbeliebtheit auf der ganzen Welt sammeln. Jede Beobachtung eines Nutzers fügt der Karte einen weiteren Datenpunkt hinzu. Mit der Zeit entstehen Muster, die keine einzelne Person alleine dokumentieren könnte. Und natürlich ist das auch einfach ein lustiger Spielplatz für neugierige Kiffer, die wissen wollen, was sie rauchen. 🌿",
+    contact_title: "Kontakt",
+    found_at: "Gefunden auf Mary Jane Berlin 2026 🇩🇪",
+    more: "mehr",
+    tab_map: "Karte", tab_list: "Liste",
+    cat_soon: "🐈 Katze kommt bald",
+    also_in: "Auch gefunden in:"
+  },
+  ru: {
+    tagline: "Атлас сортов",
+    nav_map: "Карта", nav_strains: "Сорта", nav_effects: "Эффекты", nav_links: "О проекте",
+    strains_title: "Сорта", strains_sub: "25 задокументированных сортов — нажмите для изучения",
+    effects_title: "Эффекты", effects_sub: "38 наблюдаемых эффектов — нажмите чтобы увидеть сорта",
+    click_city: "Нажмите на город →",
+    effects_label: "Эффекты", strains_found: "сортов",
+    about_title: "О EFECTO",
+    observer_tag: "🔬 Не эксперт. Наблюдатель. Один человек, одна система наблюдения.",
+    about_p1: "Проект начался как личные заметки — привычка записывать что я замечал после каждой сессии. Название сорта, эффекты, место, контекст. После 130+ задокументированных сортов паттерны стали слишком интересными, чтобы держать их при себе.",
+    about_p2: "Данные здесь представляют 25 наиболее интересных сортов из архива. Один наблюдатель, одна система наблюдения.",
+    why_effects: "Почему эффекты?",
+    about_p3: "Названия сортов и процент ТГК почти ничего не говорят о том, каким будет ощущение. Эффекты — вот что важно. Многие из нас замечают разнообразие эффектов и то, как разные сорта по-разному на нас действуют. Представьте, что вы хотите выбрать сорт для сна? Просто выберите эффект сонливость и посмотрите, какие сорта оказывали такой эффект и даже где! Наше приложение не использовалось, не используется и не будет использоваться ни для продажи, ни для пропаганды курения марихуаны. Это просто удобный инструмент, чтобы искать любимые сорта. Однако помните, что курение марихуаны вредит Вашему здоровью и берегите себя!",
+    future_title: "Будущее",
+    about_p4: "Наша цель — по-настоящему огромный атлас сортов и эффектов, который даст реальное представление о связи между ними. Мы хотим собрать полезные данные о географии и популярности сортов по всему миру. Каждое наблюдение пользователя добавляет новую точку на карту. Со временем появляются паттерны, которые ни один человек не смог бы задокументировать в одиночку. И конечно — это просто забавная игра для растаманов, которые любят знать что курят. 🌿",
+    contact_title: "Контакты",
+    found_at: "Найдено на Mary Jane Berlin 2026 🇩🇪",
+    more: "ещё",
+    tab_map: "Карта", tab_list: "Список",
+    cat_soon: "🐈 котик скоро будет",
+    also_in: "Также встречается в:"
+  },
+  pl: {
+    tagline: "Atlas gatunków",
+    nav_map: "Mapa", nav_strains: "Gatunki", nav_effects: "Efekty", nav_links: "Linki",
+    strains_title: "Gatunki", strains_sub: "25 udokumentowanych gatunków — kliknij aby odkryć",
+    effects_title: "Efekty", effects_sub: "38 zaobserwowanych efektów — kliknij dla gatunków",
+    click_city: "Kliknij miasto →",
+    effects_label: "Efekty", strains_found: "gatunków",
+    about_title: "O EFECTO",
+    observer_tag: "🔬 Nie ekspert. Obserwator. Jedna osoba, jeden spójny system.",
+    about_p1: "Projekt zaczął się jako osobiste notatki — nawyk zapisywania tego, co zauważałem po każdej sesji. Po 130+ udokumentowanych szczepach wzorce stały się zbyt interesujące, by zachować je dla siebie.",
+    about_p2: "Dane tutaj reprezentują 25 najciekawszych szczepów z archiwum. Jeden obserwator, jedna metodologia.",
+    why_effects: "Dlaczego efekty?",
+    about_p3: "Nazwy odmian i procenty THC prawie nic nie mówią o tym, jak będzie wyglądało doświadczenie. Efekty są tym, co się liczy. Wielu z nas zauważa różnorodność efektów i to, jak różne odmiany działają na nas inaczej. Wyobraź sobie, że chcesz wybrać odmianę do snu? Po prostu wybierz efekt senność i sprawdź, które odmiany go wywoływały — i gdzie! Nasza aplikacja nie była, nie jest i nigdy nie będzie używana do sprzedaży ani propagowania palenia marihuany. To po prostu wygodne narzędzie do znajdowania ulubionych odmian. Pamiętaj jednak — palenie marihuany szkodzi zdrowiu. Dbaj o siebie!",
+    future_title: "Przyszłość",
+    about_p4: "Naszym celem jest naprawdę ogromny atlas odmian i efektów — taki, który da prawdziwy obraz połączeń między nimi. Chcemy zbierać użyteczne dane o geografii i popularności odmian na całym świecie. Każda obserwacja użytkownika dodaje kolejny punkt danych do mapy. Z czasem pojawiają się wzorce, których żadna pojedyncza osoba nie mogłaby samodzielnie udokumentować. I oczywiście — to też po prostu zabawna gra dla ciekawskich rastas, którzy lubią wiedzieć, co palą. 🌿",
+    contact_title: "Kontakt",
+    found_at: "Znaleziono na Mary Jane Berlin 2026 🇩🇪",
+    more: "więcej",
+    tab_map: "Mapa", tab_list: "Lista",
+    cat_soon: "🐈 kot wkrótce",
+    also_in: "Również w:"
+  }
+};
+
+let currentLang = 'en';
+
+function t(key) {
+  return (TRANSLATIONS[currentLang] || TRANSLATIONS.en)[key] || key;
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.body.setAttribute('lang', lang);
+  document.querySelectorAll('.lang-switcher button').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+  applyTranslations();
+}
+
+function applyTranslations() {
+  renderStrainsGrid();
+  renderEffectsGrid();
+  document.querySelector('.logo span').textContent = t('tagline');
+  const navBtns = document.querySelectorAll('nav button');
+  ['map','strains','effects','links'].forEach((p, i) => {
+    navBtns[i].textContent = t('nav_' + p);
+  });
+  document.querySelector('#page-strains .page-header h1').textContent = t('strains_title');
+  document.querySelector('#page-strains .page-header p').textContent = t('strains_sub');
+  document.querySelector('#page-effects .page-header h1').textContent = t('effects_title');
+  document.querySelector('#page-effects .page-header p').textContent = t('effects_sub');
+  document.getElementById('tab-map').textContent = t('tab_map');
+  document.getElementById('tab-list').textContent = t('tab_list');
+  const sc = document.getElementById('sidebarTitle');
+  if (sc && sc.textContent.includes('→')) sc.textContent = t('click_city');
+  renderLinksPage();
+}
+
+function initLangSwitcher() {
+  document.body.setAttribute('lang', currentLang);
+  const div = document.getElementById('langSwitcher');
+  ['en','de','ru','pl'].forEach(lang => {
+    const btn = document.createElement('button');
+    btn.dataset.lang = lang;
+    btn.textContent = lang.toUpperCase();
+    if (lang === currentLang) btn.classList.add('active');
+    btn.onclick = () => setLang(lang);
+    div.appendChild(btn);
+  });
+}
+// Simplified Europe SVG map with city dots
+// Coordinate projection: custom for our viewBox 960x600
+
+function initMap() {
+  const svg = document.getElementById('europe-map');
+  const countries = document.getElementById('countries');
+
+  // Simplified country outlines as SVG paths (Europe)
+  const countryPaths = [
+    // Germany
+    { d: "M460,195 L475,185 L490,188 L500,195 L505,210 L498,225 L488,230 L475,228 L462,220 L455,208 Z", id: "de" },
+    // France
+    { d: "M415,215 L435,205 L455,208 L460,225 L455,240 L440,250 L420,248 L405,238 L400,225 Z", id: "fr" },
+    // Poland
+    { d: "M500,185 L525,182 L540,188 L545,200 L540,215 L525,220 L505,218 L498,205 Z", id: "pl" },
+    // UK
+    { d: "M390,175 L405,168 L415,178 L418,192 L408,198 L395,192 Z", id: "uk" },
+    // Spain
+    { d: "M390,255 L420,248 L440,250 L445,270 L430,285 L405,285 L385,272 Z", id: "es" },
+    // Italy
+    { d: "M450,245 L465,240 L475,250 L478,265 L472,282 L462,290 L452,288 L445,275 L448,260 Z", id: "it" },
+    // Scandinavia
+    { d: "M455,130 L470,118 L490,115 L510,120 L520,138 L510,152 L490,155 L468,148 Z", id: "sc" },
+    // Netherlands/Belgium
+    { d: "M430,190 L445,185 L455,192 L452,202 L438,205 L428,198 Z", id: "nl" },
+    // Czech/Slovakia
+    { d: "M490,210 L510,205 L525,210 L525,222 L510,228 L492,225 Z", id: "cz" },
+    // Austria/Hungary
+    { d: "M490,228 L512,225 L535,228 L540,240 L525,250 L505,252 L488,245 Z", id: "at" },
+    // Belarus/Ukraine
+    { d: "M545,185 L575,178 L600,188 L610,205 L600,218 L575,225 L550,220 L540,205 Z", id: "by" },
+    // Romania/Bulgaria
+    { d: "M528,248 L555,242 L575,248 L580,262 L565,272 L540,272 L522,262 Z", id: "ro" },
+    // Baltic states
+    { d: "M520,158 L545,152 L558,162 L555,175 L535,180 L518,172 Z", id: "ba" },
+    // Greece
+    { d: "M510,275 L528,268 L535,280 L528,295 L515,298 L505,288 Z", id: "gr" },
+    // Portugal
+    { d: "M375,258 L388,254 L392,268 L385,280 L372,275 Z", id: "pt" },
+    // Switzerland
+    { d: "M445,228 L460,224 L465,232 L458,240 L445,238 Z", id: "ch" },
+  ];
+
+  countryPaths.forEach(c => {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", c.d);
+    path.setAttribute("id", "country-" + c.id);
+    countries.appendChild(path);
+  });
+
+  // Background (ocean)
+  const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  bg.setAttribute("x", "0"); bg.setAttribute("y", "0");
+  bg.setAttribute("width", "960"); bg.setAttribute("height", "600");
+  bg.setAttribute("fill", "#0e0e18");
+  bg.setAttribute("rx", "0");
+  svg.insertBefore(bg, svg.firstChild);
+
+  renderCityDots();
+}
+
+// Map geographic coords to SVG viewBox coords
+function geoToSVG(lat, lng) {
+  // Approximate linear projection centered on Europe
+  const x = (lng - (-15)) / (40 - (-15)) * 560 + 200;
+  const y = (70 - lat) / (70 - 35) * 380 + 80;
+  return { x, y };
+}
+
+function renderCityDots() {
+  const g = document.getElementById('city-dots');
+  g.innerHTML = '';
+
+  CITIES.forEach(city => {
+    const { x, y } = geoToSVG(city.lat, city.lng);
+    const cityStrains = STRAINS.filter(s => s.city === city.name);
+    if (!cityStrains.length) return;
+
+    const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    group.classList.add("city-dot");
+    group.setAttribute("transform", `translate(${x},${y})`);
+
+    // Pulse ring
+    const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    ring.setAttribute("r", "12");
+    ring.setAttribute("fill", "none");
+    ring.setAttribute("stroke", "#c8f564");
+    ring.setAttribute("stroke-width", "1");
+    ring.setAttribute("opacity", "0.3");
+    group.appendChild(ring);
+
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("r", "5");
+    dot.setAttribute("fill", "#c8f564");
+    dot.setAttribute("filter", "url(#glow)");
+    group.appendChild(dot);
+
+    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    label.setAttribute("x", "8");
+    label.setAttribute("y", "-8");
+    label.setAttribute("fill", "#c8f564");
+    label.setAttribute("font-size", "9");
+    label.setAttribute("font-family", "Space Mono, monospace");
+    label.textContent = city.name;
+    group.appendChild(label);
+
+    group.addEventListener('mouseenter', (e) => showCityPopup(city, e));
+    group.addEventListener('mouseleave', hideCityPopupDelayed);
+    group.addEventListener('click', () => selectCity(city));
+
+    g.appendChild(group);
+  });
+
+  // Add glow filter
+  const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+  defs.innerHTML = `<filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+  document.getElementById('europe-map').prepend(defs);
+}
+
+let popupTimeout = null;
+
+function showCityPopup(city, e) {
+  clearTimeout(popupTimeout);
+  const popup = document.getElementById('cityPopup');
+  const cityStrains = STRAINS.filter(s => s.city === city.name);
+  const show3 = cityStrains.slice(0, 3);
+  const rest = cityStrains.length - 3;
+
+  let html = `<h4>${city.name}</h4>`;
+  show3.forEach(s => {
+    const color = TYPE_COLORS[s.type] || '#888';
+    html += `<div class="strain-pill" style="background:${color}22; color:${color}; border:1px solid ${color}55" onclick="openStrainModal('${s.id}')">${s.name}</div>`;
+  });
+  if (rest > 0) {
+    const moreSpan = '<span class="more-link" data-city="' + city.name + '" onclick="selectCityByName(this.dataset.city)">…and ' + rest + ' more</span>';
+    html += moreSpan;
+  }
+
+  popup.innerHTML = html;
+  popup.classList.add('show');
+
+  // Position near cursor
+  const mapWrap = document.querySelector('.map-wrap');
+  const rect = mapWrap.getBoundingClientRect();
+  const svgEl = document.getElementById('europe-map');
+  const svgRect = svgEl.getBoundingClientRect();
+
+  // Get SVG point
+  const pt = svgEl.createSVGPoint();
+  pt.x = e.clientX; pt.y = e.clientY;
+
+  let px = e.clientX - rect.left + 12;
+  let py = e.clientY - rect.top - 20;
+  if (px + 220 > rect.width) px = e.clientX - rect.left - 230;
+  if (py < 0) py = 10;
+
+  popup.style.left = px + 'px';
+  popup.style.top = py + 'px';
+}
+
+function hideCityPopupDelayed() {
+  popupTimeout = setTimeout(() => {
+    const popup = document.getElementById('cityPopup');
+    popup.classList.remove('show');
+  }, 800);
+}
+
+const popup = document.getElementById('cityPopup');
+if (popup) {
+  popup.addEventListener('mouseenter', () => clearTimeout(popupTimeout));
+  popup.addEventListener('mouseleave', () => {
+    document.getElementById('cityPopup').classList.remove('show');
+  });
+}
+
+let currentSidebarTab = 'map';
+
+function switchTab(tab) {
+  currentSidebarTab = tab;
+  document.getElementById('tab-map').classList.toggle('active', tab === 'map');
+  document.getElementById('tab-list').classList.toggle('active', tab === 'list');
+  renderSidebarList();
+}
+
+function selectCityByName(name) {
+  const city = CITIES.find(c => c.name === name);
+  if (city) selectCity(city);
+}
+
+function selectCity(city) {
+  switchTab('list');
+  document.getElementById('tab-list').classList.add('active');
+  document.getElementById('tab-map').classList.remove('active');
+  currentSidebarTab = 'list';
+
+  const cityStrains = STRAINS.filter(s => s.city === city.name);
+  const title = document.getElementById('sidebarTitle');
+  title.textContent = city.name;
+
+  const body = document.getElementById('sidebarBody');
+  body.innerHTML = '';
+
+  cityStrains.forEach(s => {
+    const item = document.createElement('div');
+    item.className = 'list-strain-item';
+    const color = TYPE_COLORS[s.type] || '#888';
+    item.innerHTML = `
+      <span class="type-dot" style="background:${color}"></span>
+      <span>${s.name}</span>
+    `;
+    item.onclick = () => openStrainModal(s.id);
+    body.appendChild(item);
+  });
+}
+
+function renderSidebarList() {
+  if (currentSidebarTab === 'map') {
+    document.getElementById('sidebarTitle').textContent = t('click_city');
+    document.getElementById('sidebarBody').innerHTML = '';
+    return;
+  }
+
+  // Full list grouped by city
+  document.getElementById('sidebarTitle').textContent = 'All Strains';
+  const body = document.getElementById('sidebarBody');
+  body.innerHTML = '';
+
+  CITIES.forEach(city => {
+    const cityStrains = STRAINS.filter(s => s.city === city.name);
+    if (!cityStrains.length) return;
+
+    const group = document.createElement('div');
+    group.className = 'city-group';
+    group.innerHTML = `<h4>${city.name}</h4>`;
+
+    cityStrains.forEach(s => {
+      const item = document.createElement('div');
+      item.className = 'list-strain-item';
+      const color = TYPE_COLORS[s.type] || '#888';
+      item.innerHTML = `<span class="type-dot" style="background:${color}"></span><span>${s.name}</span>`;
+      item.onclick = () => openStrainModal(s.id);
+      group.appendChild(item);
+    });
+
+    body.appendChild(group);
+  });
+}
+
+const WELCOME_TEXTS = {
+  en: {
+    title: "Are you curious about the <em>effects</em> that different cannabis strains actually cause?",
+    sub: "Explore a hand-built atlas of 25 strains and 38 observed effects — collected by one observer across 9 cities. Share your own experience or join a community of curious researchers.",
+    btn: "Explore the Atlas →",
+    footer: "Share your experience with the world"
+  },
+  de: {
+    title: "Interessierst du dich für die <em>Wirkungen</em>, die verschiedene Cannabis-Sorten tatsächlich auslösen?",
+    sub: "Entdecke einen handgefertigten Atlas mit 25 Sorten und 38 beobachteten Effekten — gesammelt von einem Beobachter in 9 Städten. Teile deine eigene Erfahrung oder werde Teil einer Gemeinschaft neugieriger Forscher.",
+    btn: "Atlas erkunden →",
+    footer: "Teile deine Erfahrungen mit der Welt"
+  },
+  ru: {
+    title: "Тебя интересуют именно <em>эффекты</em>, которые вызывает курение марихуаны разных сортов?",
+    sub: "Исследуй атлас из 25 сортов и 38 наблюдаемых эффектов — собранных одним наблюдателем в 9 городах. Поделись своим опытом или стань частью команды любителей-исследователей.",
+    btn: "Открыть атлас →",
+    footer: "Поделись своим опытом с миром"
+  },
+  pl: {
+    title: "Czy interesują Cię <em>efekty</em>, które wywołuje palenie różnych odmian marihuany?",
+    sub: "Odkryj atlas 25 odmian i 38 zaobserwowanych efektów — zebranych przez jednego obserwatora w 9 miastach. Podziel się swoim doświadczeniem lub dołącz do społeczności ciekawskich badaczy.",
+    btn: "Odkryj Atlas →",
+    footer: "Podziel się swoim doświadczeniem ze światem"
+  }
+};
+
+let welcomeLang = 'en';
+
+function setWelcomeLang(lang) {
+  welcomeLang = lang;
+  document.getElementById('welcomeOverlay').setAttribute('lang', lang);
+  document.querySelectorAll('.wlang').forEach(b => b.classList.toggle('active', b.id === 'wl-' + lang));
+  const t = WELCOME_TEXTS[lang];
+  document.getElementById('welcome-title').innerHTML = t.title;
+  document.getElementById('welcome-sub').textContent = t.sub;
+  document.getElementById('welcome-btn').textContent = t.btn;
+  document.getElementById('welcome-footer').textContent = t.footer;
+}
+
+function closeWelcome() {
+  setLang(welcomeLang);
+  const overlay = document.getElementById('welcomeOverlay');
+  overlay.classList.add('hide');
+  setTimeout(() => overlay.remove(), 400);
+}
+
+// ── INIT ──────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initLangSwitcher();
+  initMap();
+  renderStrainsGrid();
+  renderEffectsGrid();
+  renderLinksPage();
+});
+
+// ── NAVIGATION ────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const navBtns = document.querySelectorAll('nav button');
+  const pages = ['map','strains','effects','links'];
+  navBtns[pages.indexOf(name)]?.classList.add('active');
+}
+
+// ── STRAINS GRID ──────────────────────────────────────
+function renderStrainsGrid() {
+  const grid = document.getElementById('strainsGrid');
+  grid.innerHTML = '';
+
+  STRAINS.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'strain-card';
+    const typeColor = TYPE_COLORS[s.type] || '#888';
+    const preview = s.effects.slice(0, 3);
+    const extra = s.effects.length - 3;
+
+    let bubblesHTML = preview.map(ef => {
+      const eff = EFFECTS_DICT[ef] || { color: '#888', emoji: '•' };
+      return `<span class="effect-bubble" style="color:${eff.color};border-color:${eff.color}44;background:${eff.color}11" onclick="event.stopPropagation();openEffectModal('${ef}')">${eff.emoji} ${effName(ef)}</span>`;
+    }).join('');
+    if (extra > 0) bubblesHTML += `<span class="effect-bubble" style="color:var(--muted);border-color:var(--border);background:var(--bg3)">+${extra} ${t('more')}</span>`;
+
+    card.innerHTML = `
+      <div class="card-header">
+        <h3>${s.name}</h3>
+        <span class="type-badge" style="background:${typeColor}22;color:${typeColor}">${s.type}</span>
+      </div>
+      <div class="city-tag">📍 ${s.city}</div>
+      <div class="thc-info">THC ${s.thc}% · CBD ${s.cbd}%</div>
+      <div class="effects-preview">${bubblesHTML}</div>
+    `;
+    card.addEventListener('click', () => openStrainModal(s.id));
+    grid.appendChild(card);
+  });
+}
+
+// ── EFFECTS GRID ──────────────────────────────────────
+function renderEffectsGrid() {
+  const grid = document.getElementById('effectsGrid');
+  grid.innerHTML = '';
+
+  // Sort alphabetically
+  const effKeys = Object.keys(EFFECTS_DICT).sort();
+
+  effKeys.forEach(ef => {
+    const eff = EFFECTS_DICT[ef];
+    const count = STRAINS.filter(s => s.effects.includes(ef)).length;
+
+    const card = document.createElement('div');
+    card.className = 'effect-card';
+    card.style.borderColor = eff.color + '44';
+    card.style.color = eff.color;
+    card.innerHTML = `
+      <div class="eff-emoji">${eff.emoji}</div>
+      <div class="eff-name">${effName(ef)}</div>
+      <div class="eff-count">${count} ${t('strains_found')}</div>
+    `;
+    card.addEventListener('click', () => openEffectModal(ef));
+    grid.appendChild(card);
+  });
+}
+
+// ── LINKS PAGE ────────────────────────────────────────
+function renderLinksPage() {
+  const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  setText('about-title', t('about_title'));
+  setText('observer-tag', '🔬 ' + t('observer_tag').replace('🔬 ',''));
+  setText('about-p1', t('about_p1'));
+  setText('about-p2', t('about_p2'));
+  setText('about-p3', t('about_p3'));
+  setText('about-p4', t('about_p4'));
+
+  // Join box translations
+  const joinTitles = {
+    en: "Join the research team",
+    de: "Werde Teil des Forschungsteams",
+    ru: "Присоединяйся к команде исследователей",
+    pl: "Dołącz do zespołu badaczy"
+  };
+  const joinTexts = {
+    en: "We are looking for curious people — developers, designers, or enthusiastic cannabis researchers — who want to help build the world's most honest strain effects database. If that sounds like you, get in touch.",
+    de: "Wir suchen neugierige Menschen — Entwickler, Designer oder begeisterte Cannabis-Forscher — die helfen wollen, die ehrlichste Strain-Datenbank der Welt aufzubauen.",
+    ru: "Мы ищем любознательных людей — разработчиков, дизайнеров или просто энтузиастов-исследователей марихуаны — которые хотят помочь создать самую честную базу данных эффектов сортов в мире. Если это про тебя — напиши нам.",
+    pl: "Szukamy ciekawskich ludzi — deweloperów, designerów lub entuzjastycznych badaczy konopi — którzy chcą pomóc zbudować najbardziej uczciwy atlas efektów odmian na świecie."
+  };
+  const formTitles = {
+    en: "Share your experience",
+    de: "Teile deine Erfahrung",
+    ru: "Поделись своим опытом",
+    pl: "Podziel się swoim doświadczeniem"
+  };
+  const formSubs = {
+    en: "Tried a strain? Tell us what you felt. Your observations help build a better atlas.",
+    de: "Eine Sorte ausprobiert? Erzähl uns, was du gespürt hast.",
+    ru: "Пробовал сорт? Расскажи что почувствовал. Твои наблюдения помогают строить лучший атлас.",
+    pl: "Próbowałeś odmiany? Powiedz nam, co czułeś."
+  };
+
+  const jt = document.getElementById('join-title');
+  const jtx = document.getElementById('join-text');
+  const ft = document.getElementById('form-title');
+  const fs = document.getElementById('form-sub');
+  if (jt) jt.textContent = joinTitles[currentLang] || joinTitles.en;
+  if (jtx) jtx.textContent = joinTexts[currentLang] || joinTexts.en;
+  if (ft) ft.textContent = formTitles[currentLang] || formTitles.en;
+  if (fs) fs.textContent = formSubs[currentLang] || formSubs.en;
+
+  // Render effect checkboxes
+  const cb = document.getElementById('effectsCheckboxes');
+  if (cb && cb.children.length === 0) {
+    Object.keys(EFFECTS_DICT).sort().forEach(ef => {
+      const eff = EFFECTS_DICT[ef];
+      const label = document.createElement('label');
+      label.className = 'effect-checkbox';
+      label.style.borderColor = eff.color + '44';
+      const chk2 = document.createElement('input');
+      chk2.type = 'checkbox'; chk2.name = 'effects'; chk2.value = ef;
+      const spn2 = document.createElement('span');
+      spn2.style.color = eff.color;
+      spn2.textContent = eff.emoji + ' ' + effName(ef);
+      label.appendChild(chk2); label.appendChild(spn2);
+      cb.appendChild(label);
+    });
+  }
+}
+
+// ── MODALS ────────────────────────────────────────────
+function openStrainModal(id) {
+  const s = STRAINS.find(x => x.id === id);
+  if (!s) return;
+  const typeColor = TYPE_COLORS[s.type] || '#888';
+
+  const bubblesHTML = s.effects.map(ef => {
+    const eff = EFFECTS_DICT[ef] || { color: '#888', emoji: '•' };
+    return `<span class="effect-bubble" style="color:${eff.color};border-color:${eff.color}55;background:${eff.color}15;cursor:pointer" onclick="closeModalBtn();setTimeout(()=>openEffectModal('${ef}'),200)">${eff.emoji} ${effName(ef)}</span>`;
+  }).join('');
+
+  document.getElementById('modalContent').innerHTML = `
+    <h2 style="color:var(--text)">${s.name}</h2>
+    <div class="modal-meta">
+      <span class="type-badge" style="background:${typeColor}22;color:${typeColor}">${s.type}</span>
+      <span>THC ${s.thc}%</span>
+      ${s.cbd > 0 ? `<span>CBD ${s.cbd}%</span>` : ''}
+      <span>📍 ${s.city}</span>
+    </div>
+    <div class="cat-placeholder">
+      🐈‍⬛
+      <span>${t('cat_soon')}</span>
+    </div>
+    <div class="section-title">${t('effects_label')} (${s.effects.length})</div>
+    <div class="effects-list">${bubblesHTML}</div>
+  `;
+
+  showModal();
+}
+
+function openEffectModal(ef) {
+  const eff = EFFECTS_DICT[ef];
+  if (!eff) return;
+
+  const strainsWithEff = STRAINS.filter(s => s.effects.includes(ef));
+
+  const strainPillsHTML = strainsWithEff.map(s => {
+    const typeColor = TYPE_COLORS[s.type] || '#888';
+    return `<span class="strain-pill" style="background:${typeColor}22;color:${typeColor};border:1px solid ${typeColor}55;cursor:pointer" onclick="closeModalBtn();setTimeout(()=>openStrainModal('${s.id}'),200)">${s.name}</span>`;
+  }).join('');
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="effect-modal-emoji">${eff.emoji}</div>
+    <div class="effect-modal-name" style="color:${eff.color}">${effName(ef)}</div>
+    <p class="effect-modal-desc">${effDesc(ef)}</p>
+    <div class="section-title">${t('also_in')} (${strainsWithEff.length})</div>
+    <div class="effect-strains-list">${strainPillsHTML}</div>
+  `;
+
+  showModal();
+}
+
+function showModal() {
+  document.getElementById('modalOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalBtn();
+}
+
+function closeModalBtn() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModalBtn();
+});
+</script>
+
+<footer>
+  <span>Inspired by <a href="https://releaf.co.uk" target="_blank">Releaf</a> & <a href="https://www.leafly.com" target="_blank">Leafly</a></span>
+  <span>© All rights reserved · EFECTO · Stettin 2026</span>
+  <span>Big database of cannabis experience</span>
+</footer>
+
+</body>
+</html>
