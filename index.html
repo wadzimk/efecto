@@ -488,6 +488,25 @@
   }
 
 
+
+  .share-header-btn {
+    background: linear-gradient(135deg, #f9c846, #f4a800);
+    color: #1a1000;
+    border: none;
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 0.95rem;
+    padding: 8px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(249,200,70,0.4);
+    transition: transform .2s, box-shadow .2s;
+    white-space: nowrap;
+  }
+  .share-header-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(249,200,70,0.55);
+  }
+
   /* ── WELCOME OVERLAY ── */
   .welcome-overlay {
     position: fixed;
@@ -747,6 +766,79 @@
   footer a { color: var(--muted); text-decoration: underline; }
   footer a:hover { color: var(--accent); }
 
+
+  /* ── TOP / FLOP BUTTONS ── */
+  .topflop-wrap {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 18px;
+  }
+
+  .tf-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 50px;
+    border: 3px solid;
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    overflow: hidden;
+    background: white;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+  }
+  .tf-btn:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0px rgba(0,0,0,0.5); }
+  .tf-btn:active { transform: translate(2px,2px); box-shadow: 2px 2px 0px rgba(0,0,0,0.5); }
+
+  .tf-btn.top { border-color: #2ecc71; color: #1a7a40; }
+  .tf-btn.flop { border-color: #e74c3c; color: #8b1a12; }
+
+  .tf-btn .tf-icon { font-size: 1.2rem; }
+  .tf-btn .tf-count {
+    font-size: 0.75rem;
+    background: rgba(0,0,0,0.08);
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Newspaper halftone texture on buttons */
+  .tf-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px);
+    background-size: 4px 4px;
+    pointer-events: none;
+  }
+
+  /* Splash animation */
+  .tf-btn .splash {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .tf-btn.splashing .splash { animation: splashAnim 0.5s ease forwards; }
+  @keyframes splashAnim {
+    0%   { opacity: 1; transform: scale(0.5); }
+    50%  { opacity: 1; transform: scale(1.3); }
+    100% { opacity: 0; transform: scale(1.8); }
+  }
+  .splash-lines {
+    font-size: 1.4rem;
+    letter-spacing: -2px;
+  }
+  .tf-btn.voted { opacity: 0.7; cursor: default; }
+  .tf-btn.voted:hover { transform: none; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); }
+
   /* scrollbar */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -794,6 +886,9 @@
     <button onclick="showPage('effects')">Effects</button>
     <button onclick="showPage('links')">Links</button>
   </nav>
+  <button class="share-header-btn" onclick="showPage('links');setTimeout(()=>document.getElementById('effectsCheckboxes')?.scrollIntoView({behavior:'smooth'}),300)">
+    ✨ Share
+  </button>
   <div class="lang-switcher" id="langSwitcher"></div>
 </header>
 
@@ -1767,6 +1862,53 @@ function closeWelcome() {
   setTimeout(() => overlay.remove(), 400);
 }
 
+
+// ── TOP / FLOP ────────────────────────────────────
+const votes = {};
+
+function getVotes(id) {
+  if (!votes[id]) votes[id] = { top: 0, flop: 0, voted: null };
+  return votes[id];
+}
+
+function vote(id, type) {
+  const v = getVotes(id);
+  if (v.voted) return;
+  v[type]++;
+  v.voted = type;
+
+  // Update display
+  const wrap = document.getElementById('tf-' + id);
+  if (!wrap) return;
+
+  wrap.querySelector('.tf-btn.top .tf-count').textContent = votes[id].top;
+  wrap.querySelector('.tf-btn.flop .tf-count').textContent = votes[id].flop;
+
+  const btn = wrap.querySelector('.tf-btn.' + type);
+  btn.classList.add('splashing');
+  setTimeout(() => btn.classList.remove('splashing'), 500);
+
+  // Disable both after vote
+  wrap.querySelectorAll('.tf-btn').forEach(b => b.classList.add('voted'));
+}
+
+function topFlopHTML(strainId) {
+  const v = getVotes(strainId);
+  const voted = v.voted ? ' voted' : '';
+  return '<div class="topflop-wrap" id="tf-' + strainId + '">' +
+    '<button class="tf-btn top' + voted + '" onclick="vote(\''+strainId+'\',\'top\')">' +
+      '<span class="tf-icon">👍</span><span>TOP</span>' +
+      '<span class="tf-count">' + v.top + '</span>' +
+      '<div class="splash"><span class="splash-lines">|||</span></div>' +
+    '</button>' +
+    '<button class="tf-btn flop' + voted + '" onclick="vote(\''+strainId+'\',\'flop\')">' +
+      '<span class="tf-icon">👎</span><span>FLOP</span>' +
+      '<span class="tf-count">' + v.flop + '</span>' +
+      '<div class="splash"><span class="splash-lines">|||</span></div>' +
+    '</button>' +
+  '</div>';
+}
+
 // ── INIT ──────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initLangSwitcher();
@@ -1927,12 +2069,13 @@ function openStrainModal(id) {
       ${s.cbd > 0 ? `<span>CBD ${s.cbd}%</span>` : ''}
       <span>📍 ${s.city}</span>
     </div>
-    <div class="cat-placeholder">
+    <div class="cat-placeholder" id="cat-${s.id}">
       🐈‍⬛
       <span>${t('cat_soon')}</span>
     </div>
     <div class="section-title">${t('effects_label')} (${s.effects.length})</div>
     <div class="effects-list">${bubblesHTML}</div>
+    ${topFlopHTML(s.id)}
   `;
 
   showModal();
@@ -1962,6 +2105,20 @@ function openEffectModal(ef) {
 
 function showModal() {
   document.getElementById('modalOverlay').classList.add('show');
+  // Try loading cat image
+  setTimeout(() => {
+    const ph = document.querySelector('.cat-placeholder');
+    if (!ph) return;
+    const id = ph.id.replace('cat-', '');
+    const img = new Image();
+    img.onload = function() {
+      ph.innerHTML = '';
+      ph.style.cssText += ';padding:0;border:none;background:none;height:auto';
+      img.style.cssText = 'width:100%;height:160px;object-fit:cover;border-radius:10px;display:block';
+      ph.appendChild(img);
+    };
+    img.src = 'cats/' + id + '.jpg';
+  }, 50);
   document.body.style.overflow = 'hidden';
 }
 
