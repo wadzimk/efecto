@@ -3,17 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="supported-color-schemes" content="dark">
 <title>EFECTO — The Strain Atlas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&family=Space+Mono:wght@400;700&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
+    color-scheme: dark;
     --bg:        #0e0e12;
     --bg2:       #16161e;
     --bg3:       #1e1e2a;
     --border:    #2a2a3a;
     --text:      #e8e8f0;
-    --muted:     #888899;
+    --muted:     #aaaabc;
     --accent:    #c8f564;
     --sativa:    #FFD166;
     --indica:    #8B7FE8;
@@ -357,7 +360,7 @@
     max-width: 640px;
     line-height: 1.7;
   }
-  #page-links h2 { font-family: 'Fredoka One', 'Comfortaa', cursive; font-size: 1.8rem; color: var(--accent); margin-bottom: 16px; }
+  #page-links h2 { font-family: 'Fredoka One', 'Comfortaa', cursive; font-size: 1.8rem; color: var(--accent); margin-bottom: 16px; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
   #page-links h3 { font-family: 'Fredoka One', 'Comfortaa', cursive; color: var(--text); margin: 24px 0 10px; font-size: 1.2rem; }
   #page-links p { color: var(--muted); margin-bottom: 10px; }
   #page-links .observer-tag {
@@ -475,8 +478,8 @@
 
   /* ── page subtitle ── */
   .page-header { margin-bottom: 24px; }
-  .page-header h1 { font-family: 'Fredoka One', 'Comfortaa', cursive; font-size: 1.8rem; color: var(--accent); margin-bottom: 4px; }
-  .page-header p { color: var(--muted); font-size: 0.85rem; font-family: 'Space Mono', monospace; }
+  .page-header h1 { font-family: 'Fredoka One', 'Comfortaa', cursive; font-size: 1.8rem; color: var(--accent); margin-bottom: 4px; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+  .page-header p { color: #ffffff; font-size: 0.85rem; font-family: 'Space Mono', monospace; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
 
   /* Force Comfortaa for non-Latin scripts */
   :lang(pl) .effect-bubble,
@@ -644,7 +647,7 @@
     max-width: 1100px;
   }
   #page-links .content { max-width: 100%; }
-  #page-links h2 { font-family: 'Fredoka One', 'Comfortaa', cursive; font-size: 1.8rem; color: var(--accent); margin-bottom: 16px; }
+  #page-links h2 { font-family: 'Fredoka One', 'Comfortaa', cursive; font-size: 1.8rem; color: var(--accent); margin-bottom: 16px; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
   #page-links h3 { font-family: 'Fredoka One', 'Comfortaa', cursive; color: var(--text); margin: 24px 0 10px; font-size: 1.2rem; }
   #page-links p { color: var(--muted); margin-bottom: 10px; line-height: 1.7; }
   #page-links .observer-tag {
@@ -839,6 +842,162 @@
   .tf-btn.voted { opacity: 0.7; cursor: default; }
   .tf-btn.voted:hover { transform: none; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); }
 
+
+  /* ── EFFECT CATEGORIES ── */
+  #effectsGrid {
+    display: block !important;
+  }
+  .effects-category-header {
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 1.3rem;
+    color: var(--text);
+    margin: 24px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .effects-category-header:first-child { margin-top: 0; }
+  .effects-category-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  /* ── STRAIN FILTERS ── */
+  .strain-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .filter-btn {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 0.9rem;
+    padding: 8px 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .filter-btn:hover { color: var(--text); border-color: var(--text); }
+  .filter-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(200,245,100,0.08); }
+
+
+  [lang="pl"] .effects-category-header,
+  [lang="pl"] .filter-btn,
+  [lang="pl"] .strain-filters,
+  [lang="ru"] .effects-category-header,
+  [lang="ru"] .filter-btn {
+    font-family: 'Comfortaa', cursive;
+  }
+
+
+
+
+  /* ── FORM TABS ── */
+  .form-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .form-tab {
+    flex: 1;
+    background: var(--bg3);
+    border: none;
+    color: var(--muted);
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 0.95rem;
+    padding: 10px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .form-tab.active { background: var(--accent); color: #0e0e12; }
+
+  /* ── QUICK FORM ── */
+  .quick-form { display: flex; flex-direction: column; gap: 18px; }
+  .quick-form.hidden, .share-form.hidden { display: none; }
+
+  .quick-question { display: flex; flex-direction: column; gap: 8px; }
+  .quick-question .q-label {
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 1rem;
+    color: #ffffff;
+    font-weight: 700;
+  }
+  .quick-question .q-label span {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: #ffffff;
+    display: block;
+    margin-top: 2px;
+    opacity: 0.7;
+    font-family: 'Space Mono', monospace !important;
+  }
+  .q-options { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .q-btn {
+    background: linear-gradient(180deg, #2a2a3a 0%, #1a1a26 100%);
+    border: 2px solid #3a3a50;
+    border-bottom: 4px solid #0a0a14;
+    color: #ccccdd;
+    font-family: 'Fredoka One', 'Comfortaa', cursive;
+    font-size: 0.95rem;
+    padding: 8px 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all .15s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    text-shadow: 0 0 4px rgba(0,0,0,0.9);
+  }
+  .q-btn:hover {
+    border-color: #6a6a88;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+  }
+  .q-btn:active { transform: translateY(2px); border-bottom-width: 2px; box-shadow: none; }
+  .q-btn.selected {
+    background: linear-gradient(180deg, rgba(200,245,100,0.25) 0%, rgba(200,245,100,0.1) 100%);
+    border-color: var(--accent);
+    border-bottom-color: #7ab800;
+    color: var(--accent);
+    box-shadow: 0 4px 12px rgba(200,245,100,0.25);
+  }
+
+  .quick-collected {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    min-height: 36px;
+  }
+  .quick-collected.has-effects { color: var(--accent); border-color: var(--accent); }
+
+
+
+  /* ── UNIVERSAL TEXT CONTRAST (works on both dark and light backgrounds) ── */
+  .quick-question .q-label,
+  .effects-category-header,
+  .filter-btn,
+  .eff-name,
+  .effect-card .eff-count,
+  .strain-card h3,
+  .city-tag,
+  .thc-info,
+  .page-header p,
+  .list-strain-item,
+  .section-title {
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  }
+
   /* scrollbar */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -886,7 +1045,7 @@
     <button onclick="showPage('effects')">Effects</button>
     <button onclick="showPage('links')">Links</button>
   </nav>
-  <button class="share-header-btn" onclick="showPage('links');setTimeout(()=>document.getElementById('effectsCheckboxes')?.scrollIntoView({behavior:'smooth'}),300)">
+  <button class="share-header-btn" onclick="showPage('links');setTimeout(()=>document.getElementById('share-anchor')?.scrollIntoView({behavior:'smooth'}),300)">
     ✨ Share
   </button>
   <div class="lang-switcher" id="langSwitcher"></div>
@@ -955,10 +1114,86 @@
       <p style="color: var(--text)">Found at Mary Jane Berlin 2026 🇩🇪</p>
       <p><a href="mailto:wk@mail.ee" style="color:var(--accent)">wk@mail.ee</a></p>
     </div>
-    <div class="share-form-wrap">
+    <div class="share-form-wrap" id="share-anchor">
       <h2 class="form-title" id="form-title">Share your experience</h2>
       <p class="form-sub" id="form-sub">Tried a strain? Tell us what you felt. Your observations help build a better atlas.</p>
-      <form class="share-form" action="https://formspree.io/f/xvznkyea" method="POST">
+
+      <div class="form-tabs">
+        <button class="form-tab active" id="tab-quick" onclick="switchFormTab('quick')">⚡ Quick</button>
+        <button class="form-tab" id="tab-full" onclick="switchFormTab('full')">📋 Full</button>
+      </div>
+
+      <!-- QUICK FORM -->
+      <div class="quick-form" id="quickForm">
+        <div class="form-group">
+          <label id="ql-strain">Strain name <span class="required">*</span></label>
+          <input type="text" id="quickStrain" placeholder="e.g. Blue Dream" required>
+        </div>
+        <div class="form-group">
+          <label id="ql-city">City <span class="required">*</span></label>
+          <input type="text" id="quickCity" placeholder="e.g. Berlin" required>
+        </div>
+
+        <div class="quick-question">
+          <div class="q-label">1. High or stoned?
+            <span id="qsub1">select one or both</span>
+          </div>
+          <div class="q-options">
+            <button type="button" class="q-btn" data-effect="high" onclick="toggleQ(this)">🚀 High</button>
+            <button type="button" class="q-btn" data-effect="relaxed" onclick="toggleQ(this)">🛋️ Stoned</button>
+          </div>
+        </div>
+
+        <div class="quick-question">
+          <div class="q-label">2. Energy or lazy?
+            <span id="qsub2">select one or both</span>
+          </div>
+          <div class="q-options">
+            <button type="button" class="q-btn" data-effect="energetic" onclick="toggleQ(this)">⚡ Energetic</button>
+            <button type="button" class="q-btn" data-effect="couchlocked" onclick="toggleQ(this)">😑 Lazy</button>
+          </div>
+        </div>
+
+        <div class="quick-question">
+          <div class="q-label">3. Sociable or meditative?
+            <span id="qsub3">select one or both</span>
+          </div>
+          <div class="q-options">
+            <button type="button" class="q-btn" data-effect="talkative" onclick="toggleQ(this)">💬 Sociable</button>
+            <button type="button" class="q-btn" data-effect="peaceful" onclick="toggleQ(this)">🕊️ Meditative</button>
+          </div>
+        </div>
+
+        <div class="quick-question">
+          <div class="q-label">4. Any euphoria?
+            <span id="qsub4">select all that apply</span>
+          </div>
+          <div class="q-options">
+            <button type="button" class="q-btn" data-effect="tingly" onclick="toggleQ(this)">⚡ Tingly</button>
+            <button type="button" class="q-btn" data-effect="euphoric" onclick="toggleQ(this)">✨ Euphoric</button>
+            <button type="button" class="q-btn" data-effect="happy" onclick="toggleQ(this)">😊 Happy</button>
+          </div>
+        </div>
+
+        <div class="quick-question">
+          <div class="q-label">5. Anything else?
+            <span id="qsub5">select all that apply</span>
+          </div>
+          <div class="q-options">
+            <button type="button" class="q-btn" data-effect="hungry" onclick="toggleQ(this)">🍕 Hungry</button>
+            <button type="button" class="q-btn" data-effect="thirsty" onclick="toggleQ(this)">💧 Thirsty</button>
+            <button type="button" class="q-btn" data-effect="red eyes" onclick="toggleQ(this)">👁️ Red eyes</button>
+            <button type="button" class="q-btn" data-effect="paranoid" onclick="toggleQ(this)">👁️ Paranoid</button>
+          </div>
+        </div>
+
+        <div class="quick-collected" id="quickCollected">— no effects selected yet —</div>
+
+        <button type="button" class="submit-btn" onclick="submitQuick()">Send →</button>
+      </div>
+
+      <!-- FULL FORM -->
+      <form class="share-form hidden" id="fullForm" action="https://formspree.io/f/xvznkyea" method="POST">
         <div class="form-group">
           <label id="label-name">Name <span class="optional">(optional)</span></label>
           <input type="text" name="name" placeholder="Your name or nickname">
@@ -1428,6 +1663,44 @@ const CITIES = [
   { name: "Breslau",   lat: 51.11, lng: 17.04 }
   // ← PASTE NEW CITIES HERE
 ];
+
+
+const EFFECT_CATEGORIES = [
+  { id: 'mind',     label: '🧠 Mind',     labelRu: '🧠 Разум',    labelDe: '🧠 Geist',    labelPl: '🧠 Umysł',
+    effects: ['high','euphoric','dreamy','foggy','forgetful','paranoid','reflective','clear'] },
+  { id: 'body',     label: '⚡ Body',     labelRu: '⚡ Тело',     labelDe: '⚡ Körper',   labelPl: '⚡ Ciało',
+    effects: ['active','energetic','light','tingly','couchlocked','relaxed','sleepy','rapid pulse','dizzy'] },
+  { id: 'mood',     label: '😊 Mood',     labelRu: '😊 Настроение',  labelDe: '😊 Stimmung', labelPl: '😊 Nastrój',
+    effects: ['happy','great','optimistic','peaceful','giggly','frisky','anxious','restless','unmotivated'] },
+  { id: 'social',   label: '💬 Social',   labelRu: '💬 Общение',  labelDe: '💬 Sozial',   labelPl: '💬 Społeczne',
+    effects: ['talkative','creative','productive','tuned'] },
+  { id: 'physical', label: '🍕 Physical', labelRu: '🍕 Физиология', labelDe: '🍕 Physisch', labelPl: '🍕 Fizyczne',
+    effects: ['hungry','thirsty','dry mouth','red eyes','coughing','headache','nausea','comfy','chilled'] },
+];
+
+const STRAIN_CATEGORIES = [
+  { id: 'euphoric',  label: '🚀 Euphoric',  labelRu: '🚀 Эйфорические',    labelDe: '🚀 Euphorisch', labelPl: '🚀 Euforyczne',
+    effects: ['euphoric','high','great','tingly'] },
+  { id: 'sociable',  label: '💬 Sociable',  labelRu: '💬 Общительные', labelDe: '💬 Gesellig',   labelPl: '💬 Towarzyskie',
+    effects: ['talkative','giggly','creative'] },
+  { id: 'energetic', label: '⚡ Energetic', labelRu: '⚡ Энергичные',  labelDe: '⚡ Energetisch',labelPl: '⚡ Energiczne',
+    effects: ['energetic','active','productive'] },
+  { id: 'relaxed',   label: '🌿 Relaxed',   labelRu: '🌿 Расслабляющие',labelDe: '🌿 Entspannend',labelPl: '🌿 Relaksujące',
+    effects: ['relaxed','comfy','peaceful'] },
+  { id: 'sleepy',    label: '😴 Sleepy',    labelRu: '😴 Сонные',     labelDe: '😴 Schläfrig',  labelPl: '😴 Senne',
+    effects: ['sleepy','couchlocked','unmotivated'] },
+];
+
+function getCatLabel(cat) {
+  if (currentLang === 'ru') return cat.labelRu;
+  if (currentLang === 'de') return cat.labelDe;
+  if (currentLang === 'pl') return cat.labelPl;
+  return cat.label;
+}
+
+function strainMatchesCategory(strain, cat) {
+  return cat.effects.filter(e => strain.effects.includes(e)).length >= 2;
+}
 
 const TYPE_COLORS = { Sativa: "#FFD166", Indica: "#6C5CE7", Hybrid: "#00B894" };
 const TRANSLATIONS = {
@@ -1909,6 +2182,68 @@ function topFlopHTML(strainId) {
   '</div>';
 }
 
+
+// ── QUICK FORM ────────────────────────────────────
+function switchFormTab(tab) {
+  document.getElementById('tab-quick').classList.toggle('active', tab === 'quick');
+  document.getElementById('tab-full').classList.toggle('active', tab === 'full');
+  document.getElementById('quickForm').classList.toggle('hidden', tab !== 'quick');
+  document.getElementById('fullForm').classList.toggle('hidden', tab !== 'full');
+}
+
+function toggleQ(btn) {
+  btn.classList.toggle('selected');
+  updateQuickCollected();
+}
+
+function getQuickEffects() {
+  return [...document.querySelectorAll('.q-btn.selected')].map(b => b.dataset.effect);
+}
+
+function updateQuickCollected() {
+  const effects = getQuickEffects();
+  const el = document.getElementById('quickCollected');
+  if (effects.length === 0) {
+    el.textContent = '— no effects selected yet —';
+    el.classList.remove('has-effects');
+  } else {
+    el.textContent = '✅ ' + effects.join(', ');
+    el.classList.add('has-effects');
+  }
+}
+
+function submitQuick() {
+  const strain = document.getElementById('quickStrain').value.trim();
+  const city = document.getElementById('quickCity').value.trim();
+  const effects = getQuickEffects();
+
+  if (!strain) { alert('Please enter a strain name!'); return; }
+  if (!city) { alert('Please enter a city!'); return; }
+  if (effects.length === 0) { alert('Please select at least one effect!'); return; }
+
+  // Build a hidden form and submit to Formspree
+  const form = document.createElement('form');
+  form.action = 'https://formspree.io/f/xvznkyea';
+  form.method = 'POST';
+  form.style.display = 'none';
+
+  const addField = (name, value) => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
+  };
+
+  addField('strain', strain);
+  addField('city', city);
+  addField('effects', effects.join(', '));
+  addField('form_type', 'quick');
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
 // ── INIT ──────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initLangSwitcher();
@@ -1929,11 +2264,42 @@ function showPage(name) {
 }
 
 // ── STRAINS GRID ──────────────────────────────────────
-function renderStrainsGrid() {
+function renderStrainsGrid(filterCat) {
+  // Render filter buttons
+  let filterWrap = document.getElementById('strainFilters');
+  if (!filterWrap) {
+    filterWrap = document.createElement('div');
+    filterWrap.id = 'strainFilters';
+    filterWrap.className = 'strain-filters';
+    document.getElementById('strainsGrid').before(filterWrap);
+  }
+  filterWrap.innerHTML = '';
+
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-btn' + (!filterCat ? ' active' : '');
+  allBtn.textContent = currentLang === 'ru' ? '🌿 Все' : currentLang === 'de' ? '🌿 Alle' : currentLang === 'pl' ? '🌿 Wszystkie' : '🌿 All';
+  allBtn.onclick = () => renderStrainsGrid(null);
+  filterWrap.appendChild(allBtn);
+
+  STRAIN_CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (filterCat === cat.id ? ' active' : '');
+    btn.textContent = getCatLabel(cat);
+    btn.onclick = () => renderStrainsGrid(cat.id);
+    filterWrap.appendChild(btn);
+  });
+
   const grid = document.getElementById('strainsGrid');
   grid.innerHTML = '';
 
-  STRAINS.forEach(s => {
+  const filtered = filterCat
+    ? STRAINS.filter(s => {
+        const cat = STRAIN_CATEGORIES.find(c => c.id === filterCat);
+        return cat && strainMatchesCategory(s, cat);
+      })
+    : STRAINS;
+
+  filtered.forEach(s => {
     const card = document.createElement('div');
     card.className = 'strain-card';
     const typeColor = TYPE_COLORS[s.type] || '#888';
@@ -1965,24 +2331,34 @@ function renderEffectsGrid() {
   const grid = document.getElementById('effectsGrid');
   grid.innerHTML = '';
 
-  // Sort alphabetically
-  const effKeys = Object.keys(EFFECTS_DICT).sort();
+  EFFECT_CATEGORIES.forEach(cat => {
+    // Category header
+    const header = document.createElement('div');
+    header.className = 'effects-category-header';
+    header.textContent = getCatLabel(cat);
+    grid.appendChild(header);
 
-  effKeys.forEach(ef => {
-    const eff = EFFECTS_DICT[ef];
-    const count = STRAINS.filter(s => s.effects.includes(ef)).length;
+    // Effects row
+    const row = document.createElement('div');
+    row.className = 'effects-category-row';
 
-    const card = document.createElement('div');
-    card.className = 'effect-card';
-    card.style.borderColor = eff.color + '44';
-    card.style.color = eff.color;
-    card.innerHTML = `
-      <div class="eff-emoji">${eff.emoji}</div>
-      <div class="eff-name">${effName(ef)}</div>
-      <div class="eff-count">${count} ${t('strains_found')}</div>
-    `;
-    card.addEventListener('click', () => openEffectModal(ef));
-    grid.appendChild(card);
+    cat.effects.forEach(ef => {
+      const eff = EFFECTS_DICT[ef];
+      if (!eff) return;
+      const count = STRAINS.filter(s => s.effects.includes(ef)).length;
+      const card = document.createElement('div');
+      card.className = 'effect-card';
+      card.style.borderColor = eff.color + '44';
+      card.style.color = eff.color;
+      card.innerHTML =
+        '<div class="eff-emoji">' + eff.emoji + '</div>' +
+        '<div class="eff-name">' + effName(ef) + '</div>' +
+        '<div class="eff-count">' + count + ' ' + t('strains_found') + '</div>';
+      card.addEventListener('click', () => openEffectModal(ef));
+      row.appendChild(card);
+    });
+
+    grid.appendChild(row);
   });
 }
 
